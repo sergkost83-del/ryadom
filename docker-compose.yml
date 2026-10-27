@@ -1,0 +1,58 @@
+# Только для разработки. Боевой запуск описывается отдельно (deploy/).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ryadom
+      POSTGRES_USER: ryadom
+      POSTGRES_PASSWORD: ryadom_dev_only
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ryadom -d ryadom"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+      args:
+        INSTALL_DEV: "1"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      POSTGRES_HOST: db
+      POSTGRES_DB: ryadom
+      POSTGRES_USER: ryadom
+      POSTGRES_PASSWORD: ryadom_dev_only
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py load_communities &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  tests:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      args:
+        INSTALL_DEV: "1"
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      POSTGRES_HOST: db
+      POSTGRES_DB: ryadom
+      POSTGRES_USER: ryadom
+      POSTGRES_PASSWORD: ryadom_dev_only
+    command: pytest
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:

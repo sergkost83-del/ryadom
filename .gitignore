@@ -1,0 +1,13 @@
+.env
+*.pyc
+__pycache__/
+.venv/
+venv/
+reports/
+backend/staticfiles/
+.coverage
+htmlcov/
+node_modules/
+*.sqlite3
+.idea/
+.vscode/

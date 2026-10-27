@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Тесты сервера (PostgreSQL)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ryadom
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      POSTGRES_HOST: localhost
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ryadom
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Установка зависимостей
+        run: pip install -r requirements-dev.txt
+      - name: Линтер
+        run: ruff check .
+      - name: Миграции согласованы с моделями
+        run: python manage.py makemigrations --check --dry-run
+      - name: Тесты
+        run: |
+          mkdir -p ../reports
+          pytest --junitxml=../reports/junit.xml --cov --cov-report=xml:../reports/coverage.xml --cov-report=term
+      - name: Сводка результатов
+        if: always()
+        run: python ../tools/ci_summary.py ../reports/junit.xml ../reports/REPORT.md
+      - name: Отчёты (junit, покрытие, сводка)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: reports/
+          if-no-files-found: warn
+
+  project-checks:
+    name: Проверки проекта и безопасность
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Структура, версия, справочник, секреты, быстрые тесты
+        run: python tools/local_check.py
+      - name: Установка зависимостей
+        run: pip install -r backend/requirements-dev.txt
+      - name: Известные уязвимости зависимостей
+        run: pip-audit -r backend/requirements.txt
+      - name: Проверка боевых настроек (check --deploy)
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.prod
+          DJANGO_SECRET_KEY: ci-only-secret-key-for-deploy-check-0123456789-abcdefghij-xyz  # secret-scan: allow
+          DJANGO_ALLOWED_HOSTS: example.test
+        run: python manage.py check --deploy --fail-level WARNING
+      - name: Отчёт проверок
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: project-checks
+          path: reports/
+          if-no-files-found: ignore
+
+  docker:
+    name: Сборка образа сервера
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Сборка Docker-образа
+        run: docker build -t ryadom-backend:ci ./backend
