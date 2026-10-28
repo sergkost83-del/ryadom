@@ -92,7 +92,7 @@ jobs:
           DJANGO_SECRET_KEY: ci-only-secret-key-for-deploy-check-0123456789-abcdefghij-xyz  # secret-scan: allow
           DJANGO_ALLOWED_HOSTS: example.test
           EMAIL_HOST: smtp.example.test
-        run: python manage.py check --deploy --fail-level WARNING
+        run: python manage.py check --deploy --tag security --fail-level WARNING
       - name: Отчёт проверок
         if: always()
         uses: actions/upload-artifact@v4

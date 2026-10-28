@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -35,6 +37,7 @@ class PublicView(APIView):
 
 
 class RequestCodeView(PublicView):
+    @extend_schema(request=RequestCodeSerializer, responses={202: OpenApiTypes.OBJECT})
     def post(self, request):
         data = RequestCodeSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -44,6 +47,7 @@ class RequestCodeView(PublicView):
 
 
 class VerifyCodeView(PublicView):
+    @extend_schema(request=VerifyCodeSerializer, responses={200: OpenApiTypes.OBJECT})
     def post(self, request):
         data = VerifyCodeSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -62,6 +66,7 @@ class VerifyCodeView(PublicView):
 
 
 class RegisterView(PublicView):
+    @extend_schema(request=RegisterSerializer, responses={201: OpenApiTypes.OBJECT})
     def post(self, request):
         data = RegisterSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -88,6 +93,7 @@ class RegisterView(PublicView):
 
 
 class RefreshView(PublicView):
+    @extend_schema(request=RefreshSerializer, responses={200: OpenApiTypes.OBJECT})
     def post(self, request):
         data = RefreshSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -95,18 +101,21 @@ class RefreshView(PublicView):
 
 
 class LogoutView(APIView):
+    @extend_schema(request=None, responses={204: None})
     def post(self, request):
         services.revoke_session(request.auth)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class LogoutAllView(APIView):
+    @extend_schema(request=None, responses={204: None})
     def post(self, request):
         services.revoke_all_sessions(request.user)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SessionListView(APIView):
+    @extend_schema(responses={200: OpenApiTypes.OBJECT})
     def get(self, request):
         sessions = Session.objects.filter(user=request.user, revoked_at__isnull=True).order_by("-last_seen_at")
         return Response(
@@ -126,6 +135,7 @@ class SessionListView(APIView):
 
 
 class SessionDetailView(APIView):
+    @extend_schema(request=None, responses={204: None})
     def delete(self, request, pk):
         # Чужая сессия выглядит как несуществующая (404): перебором не узнать, какие бывают.
         session = get_object_or_404(Session, pk=pk, user=request.user)
@@ -136,9 +146,11 @@ class SessionDetailView(APIView):
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses={200: OpenApiTypes.OBJECT})
     def get(self, request):
         return Response(user_payload(request.user))
 
+    @extend_schema(request=ProfileUpdateSerializer, responses={200: OpenApiTypes.OBJECT})
     def patch(self, request):
         data = ProfileUpdateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
@@ -150,5 +162,6 @@ class MeView(APIView):
 
 
 class LegalCurrentView(PublicView):
+    @extend_schema(responses={200: OpenApiTypes.OBJECT})
     def get(self, request):
         return Response({"documents": settings.LEGAL_DOCUMENT_VERSIONS, "minimum_age": settings.MINIMUM_AGE})
