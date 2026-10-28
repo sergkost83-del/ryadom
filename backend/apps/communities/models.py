@@ -6,7 +6,9 @@
 
 import uuid
 
+from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class BaseModel(models.Model):
@@ -96,3 +98,46 @@ class Building(BaseModel):
 
     def __str__(self):
         return f"{self.street.name}, {self.label}"
+
+
+class Membership(BaseModel):
+    """Принадлежность жителя дому. Доступ к закрытым данным дома определяется только подтверждённым членством."""
+
+    ROLE_RESIDENT = "resident"
+    ROLE_CHOICES = [(ROLE_RESIDENT, "Житель")]
+
+    STATUS_PENDING = "pending"
+    STATUS_CONFIRMED = "confirmed"
+    STATUS_REJECTED = "rejected"
+    STATUS_ENDED = "ended"
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Ожидает подтверждения"),
+        (STATUS_CONFIRMED, "Подтверждён"),
+        (STATUS_REJECTED, "Отклонён"),
+        (STATUS_ENDED, "Завершён"),
+    ]
+    ACTIVE_STATUSES = [STATUS_PENDING, STATUS_CONFIRMED]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="memberships")
+    building = models.ForeignKey(Building, on_delete=models.PROTECT, related_name="memberships")
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_RESIDENT)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    confirmed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    valid_from = models.DateTimeField(default=timezone.now)
+    valid_to = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            # На MVP у жителя один активный адрес; смена — через завершение старого и новую заявку.
+            models.UniqueConstraint(
+                fields=["user"],
+                condition=models.Q(status__in=["pending", "confirmed"]),
+                name="communities_membership_one_active_per_user",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} → {self.building_id} ({self.status})"

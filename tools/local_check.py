@@ -124,7 +124,7 @@ def run_unittests():
     """Быстрые тесты без базы. Два набора запускаются раздельно: у них одинаковое имя пакета tests."""
     runs = [
         ([sys.executable, "-m", "unittest", "discover", "-s", "tools/tests", "-t", "tools"], ROOT),
-        ([sys.executable, "-m", "unittest", "tests.test_seed_parser"], ROOT / "backend"),
+        ([sys.executable, "-m", "unittest", "tests.test_seed_parser", "tests.test_pure"], ROOT / "backend"),
     ]
     total, problems = 0, []
     for cmd, cwd in runs:

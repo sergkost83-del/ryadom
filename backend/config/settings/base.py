@@ -118,10 +118,14 @@ CSRF_COOKIE_SAMESITE = "Lax"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
-# По умолчанию API закрыт: без аутентификации доступ запрещён.
-# Классы аутентификации добавляются вместе с модулем входа.
+# По умолчанию API закрыт: без токена доступ запрещён; открытые адреса помечаются явно.
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_AUTHENTICATION_CLASSES": ["apps.identity.authentication.BearerAuthentication"],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {"anon": "120/min", "user": "600/min"},
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
@@ -141,3 +145,31 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": env("LOG_LEVEL", "INFO")},
 }
+
+# --- Вход по коду из e-mail и сессии ---
+AUTH_CODE_TTL_SECONDS = 600
+AUTH_CODE_MAX_ATTEMPTS = 5
+AUTH_CODE_RESEND_SECONDS = 60
+AUTH_REQUESTS_PER_EMAIL_HOUR = 5
+AUTH_REQUESTS_PER_IP_HOUR = 20
+AUTH_VERIFY_PER_EMAIL_HOUR = 10
+AUTH_VERIFY_PER_IP_HOUR = 60
+AUTH_REGISTRATION_TTL_SECONDS = 900
+AUTH_ACCESS_TTL_SECONDS = 900
+AUTH_REFRESH_TTL_DAYS = 60
+# Сколько прокси стоит перед сервером (для определения IP клиента по X-Forwarded-For).
+TRUSTED_PROXY_COUNT = int(env("TRUSTED_PROXY_COUNT", "0"))
+
+# Версии юридических документов. Меняются только вместе с публикацией нового текста (после проверки юристом).
+LEGAL_DOCUMENT_VERSIONS = {"privacy_policy": "2026-10-draft", "personal_data": "2026-10-draft"}
+MINIMUM_AGE = 18
+
+# --- Почта ---
+EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(env("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
+EMAIL_TIMEOUT = 10
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "РЯДОМ <no-reply@localhost>")

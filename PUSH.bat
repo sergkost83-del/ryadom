@@ -16,6 +16,13 @@ if not exist ".git" (
   exit /b 2
 )
 
+if exist "ryadom\backend\manage.py" (
+  echo [ERROR] Found a nested folder "ryadom" inside the project: update files were copied to the wrong place.
+  echo         Delete that inner "ryadom" folder and copy the update files directly into this folder.
+  pause
+  exit /b 3
+)
+
 git add -A
 git diff --cached --quiet
 if not errorlevel 1 (
@@ -25,7 +32,7 @@ if not errorlevel 1 (
 )
 
 echo Changed files:
-git diff --cached --stat
+git --no-pager diff --cached --stat
 echo.
 set "MSG="
 set /p MSG=Short description of the change ^(Enter = update^): 

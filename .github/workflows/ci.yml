@@ -91,6 +91,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: config.settings.prod
           DJANGO_SECRET_KEY: ci-only-secret-key-for-deploy-check-0123456789-abcdefghij-xyz  # secret-scan: allow
           DJANGO_ALLOWED_HOSTS: example.test
+          EMAIL_HOST: smtp.example.test
         run: python manage.py check --deploy --fail-level WARNING
       - name: Отчёт проверок
         if: always()

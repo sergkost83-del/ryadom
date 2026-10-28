@@ -3,7 +3,7 @@
 from django.core.exceptions import ImproperlyConfigured
 
 from .base import *  # noqa: F401,F403
-from .base import ALLOWED_HOSTS, SECRET_KEY, env_bool
+from .base import ALLOWED_HOSTS, SECRET_KEY, env, env_bool
 
 DEBUG = False
 
@@ -11,6 +11,12 @@ if not SECRET_KEY or len(SECRET_KEY) < 50 or SECRET_KEY.startswith("insecure"):
     raise ImproperlyConfigured("DJANGO_SECRET_KEY обязателен: не короче 50 символов, не 'insecure…'.")
 if not ALLOWED_HOSTS:
     raise ImproperlyConfigured("DJANGO_ALLOWED_HOSTS обязателен (через запятую).")
+
+if not env("EMAIL_HOST"):
+    raise ImproperlyConfigured("EMAIL_HOST обязателен: без почты не работает вход по коду.")
+
+# За прокси (Caddy/nginx) IP клиента берём из X-Forwarded-For; без этого лимиты считались бы по IP прокси.
+TRUSTED_PROXY_COUNT = int(env("TRUSTED_PROXY_COUNT", "1"))
 
 SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", True)
 SESSION_COOKIE_SECURE = True
