@@ -163,6 +163,8 @@ TRUSTED_PROXY_COUNT = int(env("TRUSTED_PROXY_COUNT", "0"))
 # Версии юридических документов. Меняются только вместе с публикацией нового текста (после проверки юристом).
 LEGAL_DOCUMENT_VERSIONS = {"privacy_policy": "2026-10-draft", "personal_data": "2026-10-draft"}
 MINIMUM_AGE = 18
+# Срок между запросом на удаление и окончательным стиранием данных. Предварительно: утвердить с юристом.
+ACCOUNT_ERASURE_DAYS = 30
 
 # --- Почта ---
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")

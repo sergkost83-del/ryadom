@@ -141,3 +141,21 @@ class Membership(BaseModel):
 
     def __str__(self):
         return f"{self.user_id} → {self.building_id} ({self.status})"
+
+
+class Notice(BaseModel):
+    """Объявление для жителей дома (от модератора или УК). Видно только подтверждённым жителям этого дома."""
+
+    building = models.ForeignKey(Building, on_delete=models.PROTECT, related_name="notices")
+    title = models.CharField(max_length=120)
+    body = models.TextField()
+    is_published = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title

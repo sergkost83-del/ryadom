@@ -3,7 +3,8 @@ from rest_framework import serializers
 
 from apps.communities.models import Building
 
-from . import pure
+from . import pure, services
+from .models import normalize_email
 
 
 class RequestCodeSerializer(serializers.Serializer):
@@ -82,6 +83,31 @@ class ProfileUpdateSerializer(serializers.Serializer):
             raise serializers.ValidationError(str(exc)) from None
 
 
+class ConsentAcceptSerializer(serializers.Serializer):
+    consents = serializers.DictField(child=serializers.CharField(max_length=40))
+
+    def validate_consents(self, value):
+        if value != settings.LEGAL_DOCUMENT_VERSIONS:
+            raise serializers.ValidationError(
+                "Нужно принять актуальные версии политики и согласия на обработку данных."
+            )
+        return value
+
+
+class ConsentWithdrawSerializer(serializers.Serializer):
+    consent_type = serializers.ChoiceField(choices=["privacy_policy", "personal_data"])
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    confirm_email = serializers.EmailField(max_length=254)
+
+    def validate_confirm_email(self, value):
+        user = self.context["user"]
+        if normalize_email(value) != user.email:
+            raise serializers.ValidationError("Введите e-mail вашего аккаунта для подтверждения.")
+        return value
+
+
 def membership_payload(user):
     membership = (
         user.memberships.filter(status__in=["pending", "confirmed"])
@@ -110,5 +136,6 @@ def user_payload(user):
         "avatar_id": user.avatar_id,
         "phone": user.phone,
         "account_type": user.account_type,
+        "consents_up_to_date": services.consents_up_to_date(user),
         "membership": membership_payload(user),
     }

@@ -1,11 +1,16 @@
 from django.db.models import Prefetch
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
-from rest_framework.permissions import AllowAny
+from django.shortcuts import get_object_or_404
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.identity.permissions import ConsentsUpToDate
+
+from .access import notices_visible_to
 from .models import Building, Community, Street
+from .permissions import IsConfirmedResident
 
 
 class CommunityDirectoryView(APIView):
@@ -42,3 +47,34 @@ class CommunityDirectoryView(APIView):
                 ]
             }
         )
+
+
+def _notice(n):
+    return {
+        "id": str(n.id),
+        "title": n.title,
+        "body": n.body,
+        "created_at": n.created_at,
+        "building": {"id": str(n.building_id), "label": n.building.label, "street": n.building.street.name},
+    }
+
+
+class NoticeListView(APIView):
+    """Объявления домов, где пользователь — подтверждённый житель. Чужие дома не видны."""
+
+    permission_classes = [IsAuthenticated, ConsentsUpToDate, IsConfirmedResident]
+
+    @extend_schema(responses={200: OpenApiTypes.OBJECT})
+    def get(self, request):
+        notices = notices_visible_to(request.user).select_related("building__street")[:50]
+        return Response({"notices": [_notice(n) for n in notices]})
+
+
+class NoticeDetailView(APIView):
+    permission_classes = [IsAuthenticated, ConsentsUpToDate, IsConfirmedResident]
+
+    @extend_schema(responses={200: OpenApiTypes.OBJECT})
+    def get(self, request, pk):
+        # Чужое объявление выглядит как несуществующее (404), а не «запрещено».
+        notice = get_object_or_404(notices_visible_to(request.user).select_related("building__street"), pk=pk)
+        return Response(_notice(notice))

@@ -12,5 +12,10 @@ urlpatterns = [
     path("auth/sessions/", views.SessionListView.as_view(), name="auth-sessions"),
     path("auth/sessions/<uuid:pk>/", views.SessionDetailView.as_view(), name="auth-session-detail"),
     path("me/", views.MeView.as_view(), name="me"),
+    path("me/consents/", views.ConsentListView.as_view(), name="me-consents"),
+    path("me/consents/accept/", views.ConsentAcceptView.as_view(), name="me-consents-accept"),
+    path("me/consents/withdraw/", views.ConsentWithdrawView.as_view(), name="me-consents-withdraw"),
+    path("me/export/", views.ExportView.as_view(), name="me-export"),
+    path("me/delete/", views.DeleteAccountView.as_view(), name="me-delete"),
     path("legal/current/", views.LegalCurrentView.as_view(), name="legal-current"),
 ]

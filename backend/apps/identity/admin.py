@@ -11,7 +11,7 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ("email", "display_name")
     list_filter = ("is_active", "is_staff")
     ordering = ("-date_joined",)
-    readonly_fields = ("id", "email", "date_joined", "last_login")
+    readonly_fields = ("id", "email", "date_joined", "last_login", "deletion_requested_at")
     fields = (
         "id",
         "email",
@@ -23,6 +23,7 @@ class UserAdmin(admin.ModelAdmin):
         "user_permissions",
         "date_joined",
         "last_login",
+        "deletion_requested_at",
     )
 
     def has_add_permission(self, request):

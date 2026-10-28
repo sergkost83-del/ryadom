@@ -52,6 +52,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Тип аккаунта расширяемый: сейчас только взрослые (18+). Другие категории — после правовой проработки.
     account_type = models.CharField(max_length=20, default="adult")
     age_confirmed_at = models.DateTimeField(null=True, blank=True)
+    # Заполняется при запросе на удаление; окончательное стирание — через ACCOUNT_ERASURE_DAYS.
+    deletion_requested_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)

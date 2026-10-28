@@ -1,5 +1,7 @@
 import re
 
+from rest_framework.test import APIClient
+
 from django.conf import settings
 from django.core import mail
 
@@ -54,3 +56,19 @@ def login(api, email, **extra):
 def as_user(client, access):
     client.credentials(HTTP_AUTHORIZATION="Bearer " + access)
     return client
+
+
+def client_for(tokens):
+    """Отдельный клиент с токеном конкретного пользователя."""
+    client = APIClient()
+    client.credentials(HTTP_AUTHORIZATION="Bearer " + tokens["access"])
+    return client
+
+
+def resident(api, email, building, status="confirmed", **override):
+    """Регистрирует жителя и выставляет статус адреса (как это сделал бы модератор)."""
+    from apps.communities.models import Membership
+
+    tokens = signup(api, email, building, **override)["tokens"]
+    Membership.objects.filter(user__email=email).update(status=status)
+    return client_for(tokens)

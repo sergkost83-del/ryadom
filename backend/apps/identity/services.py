@@ -208,3 +208,35 @@ def revoke_session(session):
 
 def revoke_all_sessions(user):
     return Session.objects.filter(user=user, revoked_at__isnull=True).update(revoked_at=timezone.now())
+
+
+def consents_up_to_date(user):
+    """Приняты ли актуальные версии всех обязательных документов (и не отозваны)."""
+    from .models import Consent
+
+    accepted = set(
+        Consent.objects.filter(user=user, withdrawn_at__isnull=True).values_list("consent_type", "version")
+    )
+    return all((kind, version) in accepted for kind, version in settings.LEGAL_DOCUMENT_VERSIONS.items())
+
+
+def request_account_deletion(user):
+    """Немедленно закрывает аккаунт и все сессии; окончательное стирание — командой purge_expired."""
+    now = timezone.now()
+    user.is_active = False
+    user.deletion_requested_at = now
+    user.save(update_fields=["is_active", "deletion_requested_at"])
+    revoke_all_sessions(user)
+    return now + timedelta(days=settings.ACCOUNT_ERASURE_DAYS)
+
+
+def restore_if_within_grace(user):
+    """Если пользователь сам вошёл по коду в течение срока до стирания — отменяет удаление."""
+    if user.is_active or user.deletion_requested_at is None:
+        return False
+    if timezone.now() - user.deletion_requested_at > timedelta(days=settings.ACCOUNT_ERASURE_DAYS):
+        return False
+    user.is_active = True
+    user.deletion_requested_at = None
+    user.save(update_fields=["is_active", "deletion_requested_at"])
+    return True
