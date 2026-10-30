@@ -1,0 +1,18 @@
+{% extends "identity/twofactor_base.html" %}
+{% block title %}настройка защиты{% endblock %}
+{% block content %}
+<h2>Двухфакторная защита</h2>
+<p>Для работы в админке нужно приложение-аутентификатор, например <b>Яндекс Ключ</b>.</p>
+<ol>
+  <li>В приложении выберите «Добавить аккаунт» и отсканируйте код ниже или введите ключ вручную.</li>
+  <li>Введите 6-значный код из приложения.</li>
+</ol>
+{% if qr_svg %}<div>{{ qr_svg|safe }}</div>{% endif %}
+<p class="muted">Ключ для ручного ввода: <code>{{ secret }}</code></p>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post">{% csrf_token %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456" autofocus>
+  <button type="submit">Подтвердить</button>
+</form>
+{% endblock %}

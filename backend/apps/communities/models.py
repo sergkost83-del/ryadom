@@ -159,3 +159,92 @@ class Notice(BaseModel):
 
     def __str__(self):
         return self.title
+
+
+class ModeratorAssignment(BaseModel):
+    """Привязка модератора к ЖК (создаёт и снимает главный администратор). Модераторов на ЖК может быть несколько."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="moderator_assignments"
+    )
+    community = models.ForeignKey(Community, on_delete=models.PROTECT, related_name="moderator_assignments")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["user", "community"], name="communities_moderator_unique"),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} → {self.community_id}"
+
+
+class HouseInvite(BaseModel):
+    """Код приглашения дома: одноразовый, со сроком действия, можно отозвать. Сам код хранится только в виде хэша."""
+
+    building = models.ForeignKey(Building, on_delete=models.PROTECT, related_name="invites")
+    code_hash = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField()
+    note = models.CharField(max_length=120, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    used_at = models.DateTimeField(null=True, blank=True)
+    used_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    @property
+    def is_valid(self):
+        return self.used_at is None and self.revoked_at is None and self.expires_at > timezone.now()
+
+    def __str__(self):
+        return f"Приглашение в {self.building}"
+
+
+class AddressChangeRequest(BaseModel):
+    """Заявка на смену адреса. Решает модератор ЖК, в который хочет переехать житель, или главный администратор."""
+
+    STATUS_PENDING = "pending"
+    STATUS_APPROVED = "approved"
+    STATUS_REJECTED = "rejected"
+    STATUS_CANCELLED = "cancelled"
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Ожидает решения"),
+        (STATUS_APPROVED, "Одобрена"),
+        (STATUS_REJECTED, "Отклонена"),
+        (STATUS_CANCELLED, "Отменена"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="address_change_requests"
+    )
+    from_building = models.ForeignKey(
+        Building, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    to_building = models.ForeignKey(Building, on_delete=models.PROTECT, related_name="+")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    comment = models.CharField(max_length=200, blank=True)
+    via_invite = models.ForeignKey(HouseInvite, on_delete=models.SET_NULL, null=True, blank=True, related_name="+")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user"],
+                condition=models.Q(status="pending"),
+                name="communities_addresschange_one_pending_per_user",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id} → {self.to_building_id} ({self.status})"

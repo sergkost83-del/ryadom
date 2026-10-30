@@ -136,3 +136,24 @@ class Consent(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["user", "consent_type", "version"], name="identity_consent_unique"),
         ]
+
+
+class TOTPDevice(models.Model):
+    """Приложение-аутентификатор сотрудника. Подтверждённое устройство обязательно для входа в админку."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="totp_device")
+    secret = models.CharField(max_length=64)
+    created_at = models.DateTimeField(default=timezone.now)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    last_used_step = models.BigIntegerField(null=True, blank=True)
+
+
+class BackupCode(models.Model):
+    """Резервный код восстановления (одноразовый). Хранится только хэш."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="backup_codes")
+    code_hash = models.CharField(max_length=64)
+    created_at = models.DateTimeField(default=timezone.now)
+    used_at = models.DateTimeField(null=True, blank=True)

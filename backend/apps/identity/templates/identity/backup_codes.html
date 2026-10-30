@@ -1,0 +1,8 @@
+{% extends "identity/twofactor_base.html" %}
+{% block title %}резервные коды{% endblock %}
+{% block content %}
+<h2>Резервные коды</h2>
+<p><b>Сохраните их сейчас</b>: на экране они показываются один раз. Каждый код работает один раз и нужен, если пропадёт доступ к приложению. Храните отдельно от телефона.</p>
+<ul class="codes">{% for code in codes %}<li>{{ code }}</li>{% endfor %}</ul>
+<p><a href="{{ next }}"><button type="button">Я сохранил коды, продолжить</button></a></p>
+{% endblock %}

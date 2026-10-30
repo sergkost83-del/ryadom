@@ -2,19 +2,16 @@ import pytest
 from django.contrib.auth.models import Group
 from django.core.management import call_command
 
-from apps.communities.models import Membership
+from apps.communities.models import Membership, Notice
 from apps.identity.models import User
-from tests.helpers import resident
+from tests.helpers import admin_login, make_staff, resident
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
-def moderator(db):
-    call_command("setup_roles")
-    user = User.objects.create_user("mod@example.com", is_staff=True)
-    user.groups.add(Group.objects.get(name="Модераторы"))
-    return user
+def moderator(seeded):
+    return make_staff("mod@example.com", ["novye-gorizonty"])
 
 
 def test_setup_roles_is_idempotent_and_minimal():
@@ -23,23 +20,33 @@ def test_setup_roles_is_idempotent_and_minimal():
     group = Group.objects.get(name="Модераторы")
     codenames = set(group.permissions.values_list("codename", flat=True))
     assert codenames == {
-        "view_membership", "change_membership", "view_notice", "add_notice", "change_notice", "delete_notice",
+        "view_membership", "change_membership",
+        "view_addresschangerequest", "change_addresschangerequest",
+        "view_houseinvite", "add_houseinvite", "change_houseinvite",
+        "view_notice", "add_notice", "change_notice", "delete_notice",
         "view_building", "view_street", "view_community",
     }
-    assert not any("user" in c or "consent" in c or "session" in c for c in codenames)
+    forbidden = ("user", "consent", "session", "auditlog", "moderatorassignment", "totp", "backup")
+    assert not any(word in c for c in codenames for word in forbidden)
 
 
-def test_moderator_can_work_with_addresses_and_notices_only(client, moderator):
-    client.force_login(moderator)
-    assert client.get("/admin/communities/membership/").status_code == 200
-    assert client.get("/admin/communities/notice/").status_code == 200
-    for forbidden in ("/admin/identity/user/", "/admin/communities/region/", "/admin/auth/group/"):
-        assert client.get(forbidden).status_code == 403
+def test_moderator_can_work_with_addresses_invites_and_notices_only(client, moderator):
+    admin_login(client, moderator)
+    for allowed in ("membership", "notice", "houseinvite", "addresschangerequest", "community", "building"):
+        assert client.get(f"/admin/communities/{allowed}/").status_code == 200, allowed
+    for forbidden in (
+        "/admin/identity/user/",
+        "/admin/communities/region/",
+        "/admin/communities/moderatorassignment/",
+        "/admin/audit/auditlog/",
+        "/admin/auth/group/",
+    ):
+        assert client.get(forbidden).status_code == 403, forbidden
 
 
 def test_staff_without_role_has_no_access_to_data(client, db):
     user = User.objects.create_user("staff@example.com", is_staff=True)
-    client.force_login(user)
+    admin_login(client, user)
     assert client.get("/admin/communities/membership/").status_code == 403
 
 
@@ -51,12 +58,10 @@ def test_resident_cannot_open_admin(client, api, building):
 
 
 def test_moderator_confirms_address_and_resident_gets_access(client, api, building, moderator):
-    from apps.communities.models import Notice
-
     pending = resident(api, "new@example.com", building, status="pending")
     Notice.objects.create(building=building, title="Добро пожаловать", body="Текст")
     assert pending.get("/api/v1/notices/").status_code == 403
-    client.force_login(moderator)
+    admin_login(client, moderator)
     membership = Membership.objects.get(user__email="new@example.com")
     response = client.post(
         "/admin/communities/membership/",

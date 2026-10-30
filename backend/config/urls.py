@@ -7,6 +7,7 @@ from rest_framework.permissions import AllowAny
 from .health import health
 
 urlpatterns = [
+    path(settings.ADMIN_URL + "2fa/", include("apps.identity.twofactor_urls")),
     path(settings.ADMIN_URL, admin.site.urls),
     path("api/v1/health/", health, name="health"),
     path("api/v1/", include("apps.identity.urls")),

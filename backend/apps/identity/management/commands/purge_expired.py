@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from django.conf import settings
 
+from apps.audit.service import record
 from apps.identity.models import AuthThrottle, EmailLoginCode, RefreshToken, Session, User
 
 
@@ -30,5 +31,8 @@ class Command(BaseCommand):
         users = list(User.objects.filter(deletion_requested_at__lt=limit, is_active=False))
         for user in users:
             EmailLoginCode.objects.filter(email=user.email).delete()
+            user_id = user.pk
             user.delete()  # каскадом: сессии, токены, согласия, членства
+            record(actor=None, action="account.erased", object_type="user", object_id=user_id,
+                   note="окончательное стирание после срока удаления")
         return len(users)

@@ -1,10 +1,14 @@
 from django.contrib.auth.models import Group, Permission
 from django.core.management.base import BaseCommand, CommandError
 
-MODERATOR_GROUP = "Модераторы"
-# Модератор подтверждает адреса и публикует объявления домов; личные данные, сессии и согласия ему недоступны.
+from apps.communities.roles import MODERATOR_GROUP
+
+# Модератор подтверждает адреса, решает заявки на смену адреса, выдаёт приглашения и публикует объявления своего ЖК.
+# Привязки к ЖК, журнал аудита, пользователи, сессии и согласия ему недоступны; данные ограничены его ЖК.
 MODERATOR_PERMISSIONS = {
     "membership": ["view", "change"],
+    "addresschangerequest": ["view", "change"],
+    "houseinvite": ["view", "add", "change"],
     "notice": ["view", "add", "change", "delete"],
     "building": ["view"],
     "street": ["view"],

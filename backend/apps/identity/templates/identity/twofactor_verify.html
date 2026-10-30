@@ -1,0 +1,13 @@
+{% extends "identity/twofactor_base.html" %}
+{% block title %}вход{% endblock %}
+{% block content %}
+<h2>Подтвердите вход</h2>
+<p>Введите код из приложения-аутентификатора. Если телефон недоступен, введите один из резервных кодов (осталось: {{ backup_left }}).</p>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post">{% csrf_token %}
+  <input type="hidden" name="next" value="{{ next }}">
+  <input type="text" name="code" autocomplete="one-time-code" maxlength="16" placeholder="123456" autofocus>
+  <button type="submit">Войти</button>
+</form>
+<p class="muted">Потеряли телефон и коды? Обратитесь к главному администратору для сброса защиты.</p>
+{% endblock %}

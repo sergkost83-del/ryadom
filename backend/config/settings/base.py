@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.identity",
     "apps.communities",
+    "apps.audit",
 ]
 
 MIDDLEWARE = [
@@ -58,6 +59,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.identity.middleware.AdminTwoFactorMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -165,6 +167,17 @@ LEGAL_DOCUMENT_VERSIONS = {"privacy_policy": "2026-10-draft", "personal_data": "
 MINIMUM_AGE = 18
 # Срок между запросом на удаление и окончательным стиранием данных. Предварительно: утвердить с юристом.
 ACCOUNT_ERASURE_DAYS = 30
+
+# --- Админка: двухфакторная защита обязательна для всех сотрудников ---
+ADMIN_2FA_SESSION_HOURS = 12
+SESSION_COOKIE_AGE = ADMIN_2FA_SESSION_HOURS * 3600
+ADMIN_2FA_ATTEMPTS_PER_15_MIN = 10
+BACKUP_CODES_COUNT = 10
+
+# --- Коды приглашения домов ---
+INVITE_DEFAULT_DAYS = 14
+INVITE_MAX_DAYS = 60
+INVITE_ATTEMPTS_PER_IP_HOUR = 10
 
 # --- Почта ---
 EMAIL_BACKEND = env("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")

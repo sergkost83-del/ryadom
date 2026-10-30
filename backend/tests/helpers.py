@@ -29,14 +29,15 @@ def verified_token(api, email):
     return response.json()["registration_token"]
 
 
-def register(api, token, building, **override):
+def register(api, token, building=None, **override):
     payload = {
         "registration_token": token,
         "display_name": "Анна Иванова",
         "is_adult": True,
         "consents": dict(settings.LEGAL_DOCUMENT_VERSIONS),
-        "building_id": str(building.id),
     }
+    if building is not None:
+        payload["building_id"] = str(building.id)
     payload.update(override)
     return api.post(URL + "auth/register/", payload, format="json")
 
@@ -72,3 +73,37 @@ def resident(api, email, building, status="confirmed", **override):
     tokens = signup(api, email, building, **override)["tokens"]
     Membership.objects.filter(user__email=email).update(status=status)
     return client_for(tokens)
+
+
+PASSWORD = "a-long-test-password-1"  # secret-scan: allow
+
+
+def make_staff(email, communities=(), superuser=False):
+    """Сотрудник: главный администратор или модератор, привязанный к ЖК (по slug)."""
+    from django.core.management import call_command
+
+    from apps.communities import roles
+    from apps.communities.models import Community, ModeratorAssignment
+    from apps.identity.models import User
+
+    call_command("setup_roles")
+    if superuser:
+        return User.objects.create_superuser(email, password=PASSWORD)
+    user = User.objects.create_user(email)
+    roles.promote_to_moderator(user)
+    for slug in communities:
+        ModeratorAssignment.objects.create(user=user, community=Community.objects.get(slug=slug))
+    return user
+
+
+def admin_login(client, user):
+    """Вход в админку с уже пройденной двухфакторной проверкой (саму проверку тестирует test_twofactor)."""
+    from django.utils import timezone
+
+    from apps.identity.twofactor import SESSION_KEY
+
+    client.force_login(user)
+    session = client.session
+    session[SESSION_KEY] = timezone.now().isoformat()
+    session.save()
+    return client

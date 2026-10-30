@@ -10,6 +10,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.audit.service import record, request_ip
+from apps.communities import services as community_services
 from apps.communities.models import Membership
 
 from . import pure, services
@@ -90,9 +92,23 @@ class RegisterView(PublicView):
                         for kind, version in v["consents"].items()
                     ]
                 )
-                Membership.objects.create(user=user, building=building, status=Membership.STATUS_PENDING)
+                if invite:
+                    community_services.consume_invite(invite, user)
+                    Membership.objects.create(
+                        user=user,
+                        building=building,
+                        status=Membership.STATUS_CONFIRMED,
+                        confirmed_by=invite.created_by,
+                        confirmed_at=now,
+                    )
+                else:
+                    Membership.objects.create(user=user, building=building, status=Membership.STATUS_PENDING)
         except IntegrityError:
             raise services.Conflict() from None
+        if invite:
+            record(actor=None, action="invite.used", object_type="invite", object_id=invite.pk,
+                   community_id=building.street.community_id, ip=request_ip(request),
+                   note="регистрация по приглашению")
         tokens = services.issue_tokens(user, v["device_name"], request.META.get("HTTP_USER_AGENT", ""))
         return Response({"tokens": tokens, "user": user_payload(user)}, status=status.HTTP_201_CREATED)
 

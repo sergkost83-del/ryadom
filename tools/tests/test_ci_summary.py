@@ -34,6 +34,12 @@ class SummaryTests(unittest.TestCase):
         self.assertIn("t.B::test_x", text)
         self.assertIn("assert 1 == 2", text)
 
+    def test_long_message_is_kept(self):
+        long_xml = ('<testsuite tests="1" failures="1" errors="0" skipped="0" time="1">'
+                    '<testcase classname="t" name="x"><failure message="' + "w" * 900 + '">t</failure></testcase></testsuite>')
+        text, _ = summarize(_write(long_xml))
+        self.assertIn("w" * 900, text)
+
     def test_missing_report_is_failure(self):
         text, ok = summarize("/nonexistent/junit.xml")
         self.assertFalse(ok)

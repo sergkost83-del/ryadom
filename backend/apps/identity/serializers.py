@@ -2,6 +2,7 @@ from django.conf import settings
 from rest_framework import serializers
 
 from apps.communities.models import Building
+from apps.communities.services import find_valid_invite
 
 from . import pure, services
 from .models import normalize_email
@@ -22,7 +23,8 @@ class RegisterSerializer(serializers.Serializer):
     display_name = serializers.CharField(max_length=100)
     is_adult = serializers.BooleanField()
     consents = serializers.DictField(child=serializers.CharField(max_length=40))
-    building_id = serializers.UUIDField()
+    building_id = serializers.UUIDField(required=False)
+    invite_code = serializers.CharField(max_length=40, required=False, allow_blank=True)
     device_name = serializers.CharField(max_length=60, required=False, allow_blank=True, default="")
 
     def validate_display_name(self, value):
@@ -30,6 +32,19 @@ class RegisterSerializer(serializers.Serializer):
             return pure.clean_display_name(value)
         except ValueError as exc:
             raise serializers.ValidationError(str(exc)) from None
+
+    def validate(self, attrs):
+        code = attrs.get("invite_code")
+        building = self.context.get("building")
+        if code:
+            invite = find_valid_invite(code)
+            # Одно и то же сообщение для всех причин отказа: по ответу нельзя понять, существует ли код.
+            if invite is None or (building is not None and building.pk != invite.building_id):
+                raise serializers.ValidationError({"invite_code": "Код приглашения недействителен или истёк."})
+            self.context["invite"] = invite
+        elif building is None:
+            raise serializers.ValidationError({"building_id": "Укажите дом или код приглашения."})
+        return attrs
 
     def validate_is_adult(self, value):
         if value is not True:

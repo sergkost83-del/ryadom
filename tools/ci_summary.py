@@ -29,8 +29,8 @@ def summarize(junit_path: str) -> tuple[str, bool]:
         for kind in ("failure", "error"):
             node = case.find(kind)
             if node is not None:
-                message = (node.get("message") or (node.text or "")).strip().splitlines()
-                bad.append((f"{case.get('classname', '')}::{case.get('name', '')}", message[0][:300] if message else ""))
+                message = " ".join((node.get("message") or (node.text or "")).split())
+                bad.append((f"{case.get('classname', '')}::{case.get('name', '')}", message[:1200]))
     if total == 0:
         lines.append("- ⚠ Не выполнено ни одного теста.")
     if bad:
