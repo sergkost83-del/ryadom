@@ -75,11 +75,14 @@ class VerifyCodeView(PublicView):
 class RegisterView(PublicView):
     @extend_schema(request=RegisterSerializer, responses={201: OpenApiTypes.OBJECT})
     def post(self, request):
+        if request.data.get("invite_code"):
+            services.check_throttle("invite-ip", client_ip(request), settings.INVITE_ATTEMPTS_PER_IP_HOUR, 3600)
         data = RegisterSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         v = data.validated_data
         email = services.read_registration_token(v["registration_token"])
-        building = data.context["building"]
+        invite = data.context.get("invite")
+        building = invite.building if invite else data.context["building"]
         now = timezone.now()
         try:
             with transaction.atomic():

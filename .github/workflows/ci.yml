@@ -50,9 +50,13 @@ jobs:
       - name: Установка зависимостей
         run: pip install -r requirements-dev.txt
       - name: Линтер
-        run: ruff check .
+        run: |
+          mkdir -p ../reports
+          ruff check . --output-format=concise 2>&1 | tee ../reports/ruff.txt
       - name: Миграции согласованы с моделями
-        run: python manage.py makemigrations --check --dry-run
+        run: |
+          mkdir -p ../reports
+          python manage.py makemigrations --check --dry-run 2>&1 | tee ../reports/migrations.txt
       - name: Тесты
         run: |
           mkdir -p ../reports

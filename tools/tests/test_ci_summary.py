@@ -40,10 +40,23 @@ class SummaryTests(unittest.TestCase):
         text, _ = summarize(_write(long_xml))
         self.assertIn("w" * 900, text)
 
+    def test_missing_report_shows_linter_output(self):
+        folder = tempfile.mkdtemp()
+        (Path(folder) / "ruff.txt").write_text("apps/x.py:3:1: F821 Undefined name `a`\nFound 1 error.\n", encoding="utf-8")
+        text, ok = summarize(str(Path(folder) / "junit.xml"))
+        self.assertFalse(ok)
+        self.assertIn("F821", text)
+
+    def test_missing_report_hides_clean_linter_output(self):
+        folder = tempfile.mkdtemp()
+        (Path(folder) / "ruff.txt").write_text("All checks passed!\n", encoding="utf-8")
+        text, _ = summarize(str(Path(folder) / "junit.xml"))
+        self.assertNotIn("Линтер", text)
+
     def test_missing_report_is_failure(self):
         text, ok = summarize("/nonexistent/junit.xml")
         self.assertFalse(ok)
-        self.assertIn("не создан", text)
+        self.assertIn("не запустились", text)
 
     def test_zero_tests_is_failure(self):
         _, ok = summarize(_write('<testsuite tests="0" failures="0" errors="0" skipped="0" time="0"/>'))

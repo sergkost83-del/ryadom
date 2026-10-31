@@ -12,7 +12,14 @@ from pathlib import Path
 def summarize(junit_path: str) -> tuple[str, bool]:
     path = Path(junit_path)
     if not path.exists():
-        return "## Тесты\n❌ Отчёт тестов не создан: тесты не запустились. Смотрите лог шага «Тесты».\n", False
+        text = "## Тесты\n❌ Тесты не запустились: упал один из предыдущих шагов.\n"
+        for filename, title in (("ruff.txt", "Линтер"), ("migrations.txt", "Проверка миграций")):
+            extra = path.parent / filename
+            if extra.exists():
+                tail = [line for line in extra.read_text(encoding="utf-8", errors="replace").splitlines() if line.strip()]
+                if tail and "All checks passed" not in tail[-1] and "No changes detected" not in tail[-1]:
+                    text += f"\n### {title}\n```\n" + "\n".join(tail[-30:]) + "\n```\n"
+        return text, False
     root = ET.parse(path).getroot()
     suites = [root] if root.tag == "testsuite" else list(root.iter("testsuite"))
     total = sum(int(s.get("tests", 0)) for s in suites)

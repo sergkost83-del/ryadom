@@ -70,6 +70,14 @@ def check_syntax():
     return (not bad), bad or [f"синтаксис верен в {n} файлах Python"]
 
 
+def check_lint():
+    sys.path.insert(0, str(ROOT / "tools"))
+    from lint_lite import check_tree
+
+    problems = check_tree(ROOT / "backend")
+    return (not problems), problems[:40] or ["необъявленных имён, лишних импортов и слишком длинных строк нет"]
+
+
 def check_seed():
     sys.path.insert(0, str(ROOT / "backend"))
     try:
@@ -163,6 +171,7 @@ def main() -> int:
     steps = [
         ("Структура проекта", check_structure),
         ("Синтаксис Python", check_syntax),
+        ("Стиль кода (упрощённая проверка)", check_lint),
         ("Справочник ЖК и домов", check_seed),
         ("Версия", check_version),
         ("Секреты в коде", check_secrets),
