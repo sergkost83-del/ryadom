@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.expo/
+# копируются из design/assets командой npm run assets
+assets/images/
+assets/brand/

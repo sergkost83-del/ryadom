@@ -52,11 +52,25 @@ jobs:
       - name: Линтер
         run: |
           mkdir -p ../reports
+          set -o pipefail
           ruff check . --output-format=concise 2>&1 | tee ../reports/ruff.txt
       - name: Миграции согласованы с моделями
         run: |
           mkdir -p ../reports
+          set -o pipefail
           python manage.py makemigrations --check --dry-run 2>&1 | tee ../reports/migrations.txt
+      - name: Версии зависимостей (для будущей фиксации)
+        run: |
+          mkdir -p ../reports
+          pip freeze | sort > ../reports/requirements.lock.txt
+          {
+            echo "<details><summary>Версии зависимостей</summary>"
+            echo
+            echo '```'
+            cat ../reports/requirements.lock.txt
+            echo '```'
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Тесты
         run: |
           mkdir -p ../reports
@@ -96,7 +110,15 @@ jobs:
           DJANGO_SECRET_KEY: ci-only-secret-key-for-deploy-check-0123456789-abcdefghij-xyz  # secret-scan: allow
           DJANGO_ALLOWED_HOSTS: example.test
           EMAIL_HOST: smtp.example.test
+          FIELD_ENCRYPTION_KEYS: MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=  # secret-scan: allow
         run: python manage.py check --deploy --tag security --fail-level WARNING
+      - name: Скрипты развёртывания (shellcheck)
+        run: shellcheck -S warning deploy/*.sh deploy/backup/*.sh
+      - name: Схема развёртывания (docker compose config)
+        working-directory: deploy
+        run: |
+          cp .env.prod.example .env.prod
+          docker compose --env-file .env.prod -f docker-compose.prod.yml config --quiet
       - name: Отчёт проверок
         if: always()
         uses: actions/upload-artifact@v4
@@ -113,3 +135,57 @@ jobs:
       - uses: actions/checkout@v4
       - name: Сборка Docker-образа
         run: docker build -t ryadom-backend:ci ./backend
+      - name: Сборка образа резервного копирования
+        run: docker build -t ryadom-backup:ci ./deploy/backup
+
+  client:
+    name: Клиент (Expo, TypeScript)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      EXPO_NO_TELEMETRY: "1"
+      CI: "1"
+    defaults:
+      run:
+        shell: bash
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Копирование изображений
+        working-directory: .
+        run: node client/scripts/sync-assets.mjs
+      - name: Установка зависимостей
+        run: |
+          set -o pipefail
+          mkdir -p ../reports
+          npm install --no-audit --no-fund 2>&1 | tee ../reports/npm-install.txt
+      - name: Проверка типов
+        run: |
+          set -o pipefail
+          mkdir -p ../reports
+          npx tsc --noEmit 2>&1 | tee ../reports/tsc.txt
+      - name: Тесты
+        env:
+          JEST_JUNIT_OUTPUT_DIR: ../reports
+          JEST_JUNIT_OUTPUT_NAME: client-junit.xml
+        run: npx jest --ci --reporters=default --reporters=jest-junit
+      - name: Сборка веб-версии
+        run: |
+          set -o pipefail
+          npx expo export --platform web 2>&1 | tee ../reports/expo-export.txt
+      - name: Сводка результатов
+        if: always()
+        working-directory: .
+        run: python tools/ci_summary.py reports/client-junit.xml reports/CLIENT_REPORT.md
+      - name: Отчёты и файл блокировки версий
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-reports
+          path: |
+            reports/
+            client/package-lock.json
+          if-no-files-found: warn

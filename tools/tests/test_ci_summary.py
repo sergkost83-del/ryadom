@@ -47,6 +47,14 @@ class SummaryTests(unittest.TestCase):
         self.assertFalse(ok)
         self.assertIn("F821", text)
 
+    def test_missing_report_shows_typescript_and_npm_errors_only(self):
+        folder = tempfile.mkdtemp()
+        (Path(folder) / "tsc.txt").write_text("app/x.tsx(3,5): error TS2304: Cannot find name 'a'.\n", encoding="utf-8")
+        (Path(folder) / "npm-install.txt").write_text("added 800 packages in 40s\n", encoding="utf-8")
+        text, _ = summarize(str(Path(folder) / "junit.xml"))
+        self.assertIn("TS2304", text)
+        self.assertNotIn("added 800", text)
+
     def test_missing_report_hides_clean_linter_output(self):
         folder = tempfile.mkdtemp()
         (Path(folder) / "ruff.txt").write_text("All checks passed!\n", encoding="utf-8")

@@ -9,15 +9,38 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
+LOG_FILES = (
+    ("ruff.txt", "Линтер"),
+    ("migrations.txt", "Проверка миграций"),
+    ("npm-install.txt", "Установка пакетов (npm)"),
+    ("tsc.txt", "Проверка типов (TypeScript)"),
+    ("expo-export.txt", "Сборка веб-версии"),
+)
+
+
+def needs_attention(filename: str, lines: list[str]) -> bool:
+    """Показывать журнал в сводке только если в нём есть ошибка."""
+    joined = "\n".join(lines)
+    if filename == "ruff.txt":
+        return "All checks passed" not in lines[-1]
+    if filename == "migrations.txt":
+        return "No changes detected" not in lines[-1]
+    if filename == "npm-install.txt":
+        return "npm error" in joined or "ERR!" in joined
+    if filename == "tsc.txt":
+        return "error TS" in joined
+    return "rror" in joined
+
+
 def summarize(junit_path: str) -> tuple[str, bool]:
     path = Path(junit_path)
     if not path.exists():
         text = "## Тесты\n❌ Тесты не запустились: упал один из предыдущих шагов.\n"
-        for filename, title in (("ruff.txt", "Линтер"), ("migrations.txt", "Проверка миграций")):
+        for filename, title in LOG_FILES:
             extra = path.parent / filename
             if extra.exists():
                 tail = [line for line in extra.read_text(encoding="utf-8", errors="replace").splitlines() if line.strip()]
-                if tail and "All checks passed" not in tail[-1] and "No changes detected" not in tail[-1]:
+                if tail and needs_attention(filename, tail):
                     text += f"\n### {title}\n```\n" + "\n".join(tail[-30:]) + "\n```\n"
         return text, False
     root = ET.parse(path).getroot()
