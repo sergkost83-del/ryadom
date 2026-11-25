@@ -7,7 +7,7 @@ from django.conf import settings
 from django.db import transaction
 from django.utils import timezone
 
-from . import totp
+from . import crypto, totp
 from .models import BackupCode, TOTPDevice
 
 SESSION_KEY = "ryadom_2fa_verified_at"
@@ -37,7 +37,7 @@ def pending_device(user):
     """Неподтверждённое устройство (между показом QR и вводом кода). Секрет не меняется при перезагрузке."""
     device = TOTPDevice.objects.filter(user=user, confirmed_at__isnull=True).first()
     if device is None:
-        device = TOTPDevice.objects.create(user=user, secret=totp.generate_secret())
+        device = TOTPDevice.objects.create(user=user, secret=crypto.encrypt(totp.generate_secret()))
     return device
 
 
@@ -45,7 +45,7 @@ def confirm_device(user, code):
     device = TOTPDevice.objects.filter(user=user, confirmed_at__isnull=True).first()
     if device is None:
         return False
-    step = totp.verify_totp(device.secret, code)
+    step = totp.verify_totp(device.plain_secret, code)
     if step is None:
         return False
     device.confirmed_at = timezone.now()
@@ -63,7 +63,7 @@ def verify_code(user, code):
     if len(normalized) == totp.DIGITS and normalized.isdigit():
         with transaction.atomic():
             locked = TOTPDevice.objects.select_for_update().get(pk=device.pk)
-            step = totp.verify_totp(locked.secret, normalized, last_step=locked.last_used_step)
+            step = totp.verify_totp(locked.plain_secret, normalized, last_step=locked.last_used_step)
             if step is None:
                 return None
             locked.last_used_step = step

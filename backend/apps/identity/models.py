@@ -7,6 +7,8 @@ from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
 
+from . import crypto
+
 
 def normalize_email(value):
     """Единый вид e-mail: без пробелов по краям и в нижнем регистре."""
@@ -143,10 +145,14 @@ class TOTPDevice(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="totp_device")
-    secret = models.CharField(max_length=64)
+    secret = models.CharField(max_length=255)  # шифртекст; открытый секрет в базе не хранится
     created_at = models.DateTimeField(default=timezone.now)
     confirmed_at = models.DateTimeField(null=True, blank=True)
     last_used_step = models.BigIntegerField(null=True, blank=True)
+
+    @property
+    def plain_secret(self):
+        return crypto.decrypt(self.secret)
 
 
 class BackupCode(models.Model):

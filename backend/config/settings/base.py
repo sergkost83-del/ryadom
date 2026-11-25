@@ -70,7 +70,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -173,6 +173,9 @@ ADMIN_2FA_SESSION_HOURS = 12
 SESSION_COOKIE_AGE = ADMIN_2FA_SESSION_HOURS * 3600
 ADMIN_2FA_ATTEMPTS_PER_15_MIN = 10
 BACKUP_CODES_COUNT = 10
+
+# --- Шифрование секретов в базе: ключи Fernet через запятую, первый шифрует, остальные только читают ---
+FIELD_ENCRYPTION_KEYS = env_list("FIELD_ENCRYPTION_KEYS")
 
 # --- Коды приглашения домов ---
 INVITE_DEFAULT_DAYS = 14

@@ -1,0 +1,11 @@
+{% extends "identity/twofactor_base.html" %}
+{% block title %}резервные коды{% endblock %}
+{% block content %}
+<h2>Двухфакторная защита</h2>
+<p>Осталось неиспользованных резервных кодов: <b>{{ remaining }}</b>.</p>
+<p class="muted">Новый набор отменяет все старые коды. Новые коды показываются один раз.</p>
+<form method="post" action="{% url 'twofactor-backup-regenerate' %}">{% csrf_token %}
+  <button type="submit">Выпустить новые резервные коды</button>
+</form>
+<p><a href="{{ index }}">Назад в админку</a></p>
+{% endblock %}

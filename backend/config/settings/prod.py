@@ -3,7 +3,7 @@
 from django.core.exceptions import ImproperlyConfigured
 
 from .base import *  # noqa: F401,F403
-from .base import ALLOWED_HOSTS, SECRET_KEY, env, env_bool
+from .base import ALLOWED_HOSTS, FIELD_ENCRYPTION_KEYS, SECRET_KEY, env, env_bool
 
 DEBUG = False
 
@@ -11,6 +11,16 @@ if not SECRET_KEY or len(SECRET_KEY) < 50 or SECRET_KEY.startswith("insecure"):
     raise ImproperlyConfigured("DJANGO_SECRET_KEY обязателен: не короче 50 символов, не 'insecure…'.")
 if not ALLOWED_HOSTS:
     raise ImproperlyConfigured("DJANGO_ALLOWED_HOSTS обязателен (через запятую).")
+
+if not FIELD_ENCRYPTION_KEYS:
+    raise ImproperlyConfigured("FIELD_ENCRYPTION_KEYS обязателен (ключ Fernet, хранится вне базы).")
+try:
+    from cryptography.fernet import Fernet
+
+    for _key in FIELD_ENCRYPTION_KEYS:
+        Fernet(_key.encode())
+except ValueError:
+    raise ImproperlyConfigured("FIELD_ENCRYPTION_KEYS: ключ не в формате Fernet (44 символа base64).") from None
 
 if not env("EMAIL_HOST"):
     raise ImproperlyConfigured("EMAIL_HOST обязателен: без почты не работает вход по коду.")

@@ -1,0 +1,477 @@
+{
+  "total_bytes": 4640604,
+  "files": [
+    {
+      "file": "avatars/avatar_1_256.webp",
+      "role": "аватар 1, 256 px",
+      "bytes": 14794,
+      "width": 256,
+      "height": 256,
+      "sha256": "25c6b9bad3c07532e329301e09e3596c1797ec9e5778c6a8be5f232c3211d0bb"
+    },
+    {
+      "file": "avatars/avatar_1_512.webp",
+      "role": "аватар 1, 512 px",
+      "bytes": 31152,
+      "width": 512,
+      "height": 512,
+      "sha256": "326f9afeee5dbf4c082f6c109af2ecab07f65aa725eecedaf79255e0a47b3bf5"
+    },
+    {
+      "file": "avatars/avatar_2_256.webp",
+      "role": "аватар 2, 256 px",
+      "bytes": 13426,
+      "width": 256,
+      "height": 256,
+      "sha256": "21dd352109a925afeb3fe4f4d9f33cc826f27db18aa2fcbd9e72d9f6b0ef60ab"
+    },
+    {
+      "file": "avatars/avatar_2_512.webp",
+      "role": "аватар 2, 512 px",
+      "bytes": 27526,
+      "width": 512,
+      "height": 512,
+      "sha256": "0a72e6a55cf7eed94b76df8151a80724a1a5747988434e222d08418bde069ca3"
+    },
+    {
+      "file": "avatars/avatar_3_256.webp",
+      "role": "аватар 3, 256 px",
+      "bytes": 13056,
+      "width": 256,
+      "height": 256,
+      "sha256": "7e5146dbfeb6654d8adb26a78b9b34c7f588f8d04c5756bad52d53c7882650d1"
+    },
+    {
+      "file": "avatars/avatar_3_512.webp",
+      "role": "аватар 3, 512 px",
+      "bytes": 26192,
+      "width": 512,
+      "height": 512,
+      "sha256": "46f0b23fdf4d2c8b610df9897209ab2ebc7b86d3b55a6fb3351489f328dfe70a"
+    },
+    {
+      "file": "avatars/avatar_4_256.webp",
+      "role": "аватар 4, 256 px",
+      "bytes": 13472,
+      "width": 256,
+      "height": 256,
+      "sha256": "a8796528a17fb5ef13659d1717c86bc220bbea5347ebb40a4fa8033cb7000950"
+    },
+    {
+      "file": "avatars/avatar_4_512.webp",
+      "role": "аватар 4, 512 px",
+      "bytes": 28274,
+      "width": 512,
+      "height": 512,
+      "sha256": "3abf95b96e632336e133142e36cef38b6292f6c1a6d39bfbfed5cc0ad0571c5c"
+    },
+    {
+      "file": "avatars/avatar_5_256.webp",
+      "role": "аватар 5, 256 px",
+      "bytes": 13488,
+      "width": 256,
+      "height": 256,
+      "sha256": "15cd69c3c4749987b7002129d8029453b14c8798bcdd0a75487ab2cc6bde26d1"
+    },
+    {
+      "file": "avatars/avatar_5_512.webp",
+      "role": "аватар 5, 512 px",
+      "bytes": 31224,
+      "width": 512,
+      "height": 512,
+      "sha256": "f5fd82e7337f3fa190755588157e546e79673f013960daa989ab0bc089d947b9"
+    },
+    {
+      "file": "avatars/avatar_6_256.webp",
+      "role": "аватар 6, 256 px",
+      "bytes": 14122,
+      "width": 256,
+      "height": 256,
+      "sha256": "0796f74b65cc5d170cdcd1399d22dfdbb0010b7d527ab56e0e4ef789b4cb7179"
+    },
+    {
+      "file": "avatars/avatar_6_512.webp",
+      "role": "аватар 6, 512 px",
+      "bytes": 30612,
+      "width": 512,
+      "height": 512,
+      "sha256": "b5a35e75a2dc20ae818b5dc01416c9c04337bf10f64aa81244664870fafa46ef"
+    },
+    {
+      "file": "avatars/avatar_7_256.webp",
+      "role": "аватар 7, 256 px",
+      "bytes": 14416,
+      "width": 256,
+      "height": 256,
+      "sha256": "f28a2b23fe2236d9e92e9314e878df37e04661abd0c1ac46606d7beca3673095"
+    },
+    {
+      "file": "avatars/avatar_7_512.webp",
+      "role": "аватар 7, 512 px",
+      "bytes": 29140,
+      "width": 512,
+      "height": 512,
+      "sha256": "8037412b742e3397e0690110a13a6baeb5bf33ca16c9718711b883f07896144a"
+    },
+    {
+      "file": "avatars/avatar_8_256.webp",
+      "role": "аватар 8, 256 px",
+      "bytes": 15000,
+      "width": 256,
+      "height": 256,
+      "sha256": "4235a471da5eecc4097155fe9809fc0c520ac3d46014e7393143719c69eb7ffd"
+    },
+    {
+      "file": "avatars/avatar_8_512.webp",
+      "role": "аватар 8, 512 px",
+      "bytes": 33714,
+      "width": 512,
+      "height": 512,
+      "sha256": "9028b510b35363dbb09144cf950618af7595891a4dd06ab045c072b8484e35c7"
+    },
+    {
+      "file": "brand/adaptive-foreground.png",
+      "role": "Android adaptive icon, передний план (фон #FF5B45)",
+      "bytes": 130903,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "c6bb14791cef8bd88e1a3e99a871e9d0c7b31cd6cfe95b421b2a586bf14fe224"
+    },
+    {
+      "file": "brand/app-icon-1024.png",
+      "role": "иконка приложения iOS/Android",
+      "bytes": 752285,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "37e7722a33db1c4eb3e2d0d6a6aa3dca30dba9cea4ece7e77f8c1abe361326c7"
+    },
+    {
+      "file": "brand/favicon.png",
+      "role": "значок сайта",
+      "bytes": 2824,
+      "width": 48,
+      "height": 48,
+      "sha256": "c8aa6c3049bb8423e2b00283fc7554540cdca47d73a39ca607be3c81f155859b"
+    },
+    {
+      "file": "brand/logo-mark.png",
+      "role": "знак (прозрачный фон, исходник для генерации)",
+      "bytes": 145636,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "3505aa548cdbb74f4b7c6f6bb6b719259c9199b790e631d6d545352fb335f624"
+    },
+    {
+      "file": "brand/logo-mark_512.webp",
+      "role": "знак для интерфейса",
+      "bytes": 12458,
+      "width": 512,
+      "height": 512,
+      "sha256": "5841d2bcc79a318347375fc24d7eda4a125a5835da99e6373c5b6ee08e0c52f4"
+    },
+    {
+      "file": "brand/notification-icon.png",
+      "role": "значок уведомлений Android (белый силуэт)",
+      "bytes": 1907,
+      "width": 96,
+      "height": 96,
+      "sha256": "d6615494b9f47d889f0837b83d3b6528b6cfb2905c0078129f6beb3726f1dccf"
+    },
+    {
+      "file": "brand/play-store-icon-512.png",
+      "role": "иконка для Google Play",
+      "bytes": 206907,
+      "width": 512,
+      "height": 512,
+      "sha256": "a08102f19e5a821a7c486a6094d4f8907eccba65f1a54e39d35a96f5cdf85329"
+    },
+    {
+      "file": "brand/splash-icon.png",
+      "role": "значок экрана запуска",
+      "bytes": 142356,
+      "width": 1024,
+      "height": 1024,
+      "sha256": "6d833a77d9d586be8bd736084157d23ab55414a4ef3ce9c9fc380f8f9aef31f4"
+    },
+    {
+      "file": "covers/cover_generic_1600.webp",
+      "role": "обложка ЖК, 1600 px",
+      "bytes": 222394,
+      "width": 1600,
+      "height": 800,
+      "sha256": "36c1e48392156d1c5bc1fe208b83d7caaecc18aa41cc99526ab8c3b9cc0d0549"
+    },
+    {
+      "file": "covers/cover_generic_800.webp",
+      "role": "обложка ЖК, 800 px",
+      "bytes": 90456,
+      "width": 800,
+      "height": 400,
+      "sha256": "5b8c0c6d20dfb9ac1633dcb208cf7f56a158c4592855a986cf14f51813ec6df5"
+    },
+    {
+      "file": "covers/cover_novye-gorizonty_1600.webp",
+      "role": "обложка ЖК, 1600 px",
+      "bytes": 187252,
+      "width": 1600,
+      "height": 800,
+      "sha256": "7ae47e94856a5c5a417a7b52ef1619079e6b2df97ceb65e0027815ecb7283610"
+    },
+    {
+      "file": "covers/cover_novye-gorizonty_800.webp",
+      "role": "обложка ЖК, 800 px",
+      "bytes": 81728,
+      "width": 800,
+      "height": 400,
+      "sha256": "749a8f239f02bc410f4b391cff866bc2a043ce9da145d57931ab4d67b21fbf5c"
+    },
+    {
+      "file": "covers/cover_storony-sveta-2_1600.webp",
+      "role": "обложка ЖК, 1600 px",
+      "bytes": 194216,
+      "width": 1600,
+      "height": 800,
+      "sha256": "44f993964a82ea6a1f75a8bcbfeb2a90dbb11b566973bb60c91f098bc17bd87f"
+    },
+    {
+      "file": "covers/cover_storony-sveta-2_800.webp",
+      "role": "обложка ЖК, 800 px",
+      "bytes": 82362,
+      "width": 800,
+      "height": 400,
+      "sha256": "31381505f24b4eb4c649c9835749379fc32997cdf61ad03d828f00d98c17bf03"
+    },
+    {
+      "file": "covers/cover_storony-sveta_1600.webp",
+      "role": "обложка ЖК, 1600 px",
+      "bytes": 168064,
+      "width": 1600,
+      "height": 800,
+      "sha256": "b29fd8cf79c88b72746a58fb0f4e200e1fad0997d72bbcd9f68d2f2447b6631e"
+    },
+    {
+      "file": "covers/cover_storony-sveta_800.webp",
+      "role": "обложка ЖК, 800 px",
+      "bytes": 73132,
+      "width": 800,
+      "height": 400,
+      "sha256": "b4a3f157b5217b5854fc0a6ed693b3fab544aae5673551fb526aeaecbcfb9e0b"
+    },
+    {
+      "file": "icons/icon_chat.webp",
+      "role": "иконка раздела",
+      "bytes": 28192,
+      "width": 512,
+      "height": 512,
+      "sha256": "6a797ecb2209c8319a6caf96ad8610803ab970f058c36c488ab54cf39d765f4c"
+    },
+    {
+      "file": "icons/icon_delivery.webp",
+      "role": "иконка раздела",
+      "bytes": 60110,
+      "width": 512,
+      "height": 512,
+      "sha256": "9d5658f158bbcdc00b13703179fe9b05c7a6955ebff5d881d33c38ce5931e101"
+    },
+    {
+      "file": "icons/icon_discounts.webp",
+      "role": "иконка раздела",
+      "bytes": 16310,
+      "width": 512,
+      "height": 512,
+      "sha256": "3d9dbf8a47b9a1b934842eb5f9602dbb558507b8fafc008a3c6bd4c76619a4eb"
+    },
+    {
+      "file": "icons/icon_events.webp",
+      "role": "иконка раздела",
+      "bytes": 12208,
+      "width": 512,
+      "height": 512,
+      "sha256": "066f96525fbe6b5f294ccefec9794927285ace6ed4ccdad1b288ad261bb6f865"
+    },
+    {
+      "file": "icons/icon_market.webp",
+      "role": "иконка раздела",
+      "bytes": 49236,
+      "width": 512,
+      "height": 512,
+      "sha256": "e26215f0698143804b36c477ade393805e2ad7fbebc71bff21438b769ff819db"
+    },
+    {
+      "file": "icons/icon_masters.webp",
+      "role": "иконка раздела",
+      "bytes": 83980,
+      "width": 512,
+      "height": 512,
+      "sha256": "0163e444c13263d00010d59c0c123bbf807f2c0bf0a28f2353f1207dd49511b9"
+    },
+    {
+      "file": "icons/icon_notices.webp",
+      "role": "иконка раздела",
+      "bytes": 43838,
+      "width": 512,
+      "height": 512,
+      "sha256": "88bcf54cd19d01ff81ecfa98cf664a67863cd81d52afa43a21f02331837d7fcf"
+    },
+    {
+      "file": "icons/icon_parking.webp",
+      "role": "иконка раздела",
+      "bytes": 10496,
+      "width": 512,
+      "height": 512,
+      "sha256": "2efdd8ca08c845523e77212b3db8802a45389e74b3b28a12ba3c17c740bdd52a"
+    },
+    {
+      "file": "icons/icon_rides.webp",
+      "role": "иконка раздела",
+      "bytes": 42554,
+      "width": 512,
+      "height": 512,
+      "sha256": "9548154b7b271e969ffa2e93fc0a74661d7d509f76deb65fce4d8d01ec1fef63"
+    },
+    {
+      "file": "icons/icon_support.webp",
+      "role": "иконка раздела",
+      "bytes": 48094,
+      "width": 512,
+      "height": 512,
+      "sha256": "a6ff8a821b38608999a4678bef3e0d37563f4616e7a1877fd7d206c2bafe02a6"
+    },
+    {
+      "file": "illustrations/banner_rides.webp",
+      "role": "иллюстрация",
+      "bytes": 53330,
+      "width": 1200,
+      "height": 750,
+      "sha256": "a207691e4b2a645f3b91edcb1f08a6915e1fd361c768150357c8c869c1cd971a"
+    },
+    {
+      "file": "illustrations/car_blue.webp",
+      "role": "иллюстрация",
+      "bytes": 49856,
+      "width": 512,
+      "height": 512,
+      "sha256": "b18aff3318b5ad44bd9da4f6d3580e007905543c2b3b62cb6309576386fe7a67"
+    },
+    {
+      "file": "illustrations/car_gray.webp",
+      "role": "иллюстрация",
+      "bytes": 44300,
+      "width": 512,
+      "height": 512,
+      "sha256": "c8397a7f303f7202aeb767f2f281498ee0b1c3b35f06723785415025c8192841"
+    },
+    {
+      "file": "illustrations/car_red.webp",
+      "role": "иллюстрация",
+      "bytes": 48534,
+      "width": 512,
+      "height": 512,
+      "sha256": "c27ba9e6540b21e550baaede6cc06ccc19204cefd01650664a96c5df41139d44"
+    },
+    {
+      "file": "illustrations/empty_chats.webp",
+      "role": "иллюстрация",
+      "bytes": 70094,
+      "width": 800,
+      "height": 800,
+      "sha256": "e695bca6bdfa9a006e50e7132665d0aab2dd9fb62203991dc45c6e082984218f"
+    },
+    {
+      "file": "illustrations/empty_notices.webp",
+      "role": "иллюстрация",
+      "bytes": 21130,
+      "width": 800,
+      "height": 800,
+      "sha256": "09f6855505a4554b208e5fec6f16b34b02b60bfa025a2e552b1f1723e1e5a11c"
+    },
+    {
+      "file": "illustrations/empty_parking.webp",
+      "role": "иллюстрация",
+      "bytes": 20554,
+      "width": 800,
+      "height": 800,
+      "sha256": "31268a7a1f87fd3114925c5a1d1698bd546f67f3bc0a2cce1d1a87650d67c927"
+    },
+    {
+      "file": "illustrations/empty_rides.webp",
+      "role": "иллюстрация",
+      "bytes": 45608,
+      "width": 800,
+      "height": 800,
+      "sha256": "c90998d52b02d624979425422d86611bdfbb0e75b8fe45f34e77947d0c04fdf5"
+    },
+    {
+      "file": "illustrations/empty_search.webp",
+      "role": "иллюстрация",
+      "bytes": 20878,
+      "width": 800,
+      "height": 800,
+      "sha256": "fcf23220b624a83d9a70675615c16a5bae41e03ece6fa09e0b3d48ed4a38e7e6"
+    },
+    {
+      "file": "illustrations/no_parking_available.webp",
+      "role": "иллюстрация",
+      "bytes": 68292,
+      "width": 800,
+      "height": 800,
+      "sha256": "65a224eb640a9ab9edb10cea5df8c65376ccb10df48a417bf684f817fa8b06d3"
+    },
+    {
+      "file": "illustrations/onboarding_1.webp",
+      "role": "иллюстрация",
+      "bytes": 281352,
+      "width": 960,
+      "height": 960,
+      "sha256": "4a632d77cd4cbd91f7cbb97e4d5ece84f6a09f0c45c8507a899ad3bc9685be59"
+    },
+    {
+      "file": "illustrations/onboarding_3.webp",
+      "role": "иллюстрация",
+      "bytes": 97802,
+      "width": 960,
+      "height": 960,
+      "sha256": "b7f6661e31f276bd2c10667780c34814be490f691dc184d0ecd426fd87b84b32"
+    },
+    {
+      "file": "illustrations/state_confirmed.webp",
+      "role": "иллюстрация",
+      "bytes": 101292,
+      "width": 800,
+      "height": 800,
+      "sha256": "6fadb427dc32ac0c7f3f68a98fe0926f0e2c45899e555076b1809f0b303fd928"
+    },
+    {
+      "file": "illustrations/state_error.webp",
+      "role": "иллюстрация",
+      "bytes": 99344,
+      "width": 800,
+      "height": 800,
+      "sha256": "9ee508aebf4d830bed7005803a59064657a74e00648946ffde7c8dc38d55c88c"
+    },
+    {
+      "file": "illustrations/state_pending.webp",
+      "role": "иллюстрация",
+      "bytes": 108178,
+      "width": 800,
+      "height": 800,
+      "sha256": "ef508a10b93fc1eb048fd6a657ab1e7ec9552609aa2a6aed2be8235e6006917a"
+    },
+    {
+      "file": "placeholders/building_generic.webp",
+      "role": "обложка чата дома",
+      "bytes": 84908,
+      "width": 512,
+      "height": 512,
+      "sha256": "b4d785a439534b79b9ca3707e3f970ef183b0a9bf2248d5db3652547419ba5d8"
+    },
+    {
+      "file": "placeholders/parking_placeholder.webp",
+      "role": "заглушка фото парковки",
+      "bytes": 185646,
+      "width": 1000,
+      "height": 667,
+      "sha256": "d656818eed222c8f0e85cf841c960a511a5ad7d3f2aa8eb4191f897329666299"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# Ежедневные задачи на сервере (crontab -e). Замените /opt/ryadom на ваш путь.
+# 02:30 — шифрованная резервная копия; 03:30 — очистка устаревших кодов, токенов, счётчиков и стирание аккаунтов.
+30 2 * * * cd /opt/ryadom/deploy && docker compose --env-file .env.prod -f docker-compose.prod.yml --profile tools run --rm backup >> /var/log/ryadom-backup.log 2>&1
+30 3 * * * cd /opt/ryadom/deploy && docker compose --env-file .env.prod -f docker-compose.prod.yml run --rm backend python manage.py purge_expired >> /var/log/ryadom-purge.log 2>&1

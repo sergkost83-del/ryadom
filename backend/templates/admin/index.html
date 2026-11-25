@@ -1,0 +1,7 @@
+{% extends "admin/index.html" %}
+{% block content %}
+<div style="margin:0 0 20px;padding:12px 16px;border:1px solid #dce2e8;border-radius:12px;background:#fff">
+  <b>Моя защита:</b> <a href="{% url 'twofactor-backup-codes' %}">двухфакторная защита и резервные коды</a>
+</div>
+{{ block.super }}
+{% endblock %}

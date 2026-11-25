@@ -1,0 +1,92 @@
+# Боевой запуск на одной машине с Docker. Не привязан к провайдеру: переезд = развернуть то же самое на другом сервере.
+# Запуск: docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
+name: ryadom
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ryadom}
+      POSTGRES_USER: ${POSTGRES_USER:-ryadom}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env.prod}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging: *logging
+    networks: [internal]
+
+  backend:
+    build:
+      context: ../backend
+    restart: unless-stopped
+    env_file: .env.prod
+    environment:
+      POSTGRES_HOST: db
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import os, urllib.request as u; u.urlopen(u.Request('http://127.0.0.1:8000/api/v1/health/', headers={'Host': os.environ['DOMAIN'], 'X-Forwarded-Proto': 'https'}), timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging: *logging
+    networks: [internal, default]
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?задайте DOMAIN в .env.prod}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+    logging: *logging
+    networks: [internal, default]
+
+  # Разовые задачи: docker compose ... --profile tools run --rm backup
+  backup:
+    profiles: ["tools"]
+    build:
+      context: ./backup
+    env_file: .env.prod
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-ryadom}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?задайте POSTGRES_PASSWORD в .env.prod}
+      PGDATABASE: ${POSTGRES_DB:-ryadom}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [internal, default]
+
+volumes:
+  db_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  internal:
+    internal: true

@@ -71,11 +71,12 @@ def setup(request):
         else:
             error = "Код не подошёл. Проверьте время на телефоне и попробуйте ещё раз."
             _audit(request, "staff.2fa_failed", note="подтверждение устройства")
-    uri = totp.provisioning_uri(device.secret, user.email)
+    secret = device.plain_secret
+    uri = totp.provisioning_uri(secret, user.email)
     return render(
         request,
         "identity/twofactor_setup.html",
-        {"secret": device.secret, "qr_svg": _qr(uri), "error": error, "next": _next(request)},
+        {"secret": secret, "qr_svg": _qr(uri), "error": error, "next": _next(request)},
     )
 
 
@@ -104,6 +105,18 @@ def verify(request):
         request,
         "identity/twofactor_verify.html",
         {"error": error, "next": _next(request), "backup_left": twofactor.remaining_backup_codes(user)},
+    )
+
+
+@_staff_only
+@require_http_methods(["GET"])
+def backup_codes_page(request):
+    if not twofactor.is_verified(request):
+        return redirect(reverse("twofactor-verify"))
+    return render(
+        request,
+        "identity/backup_manage.html",
+        {"remaining": twofactor.remaining_backup_codes(request.user), "index": reverse("admin:index")},
     )
 
 

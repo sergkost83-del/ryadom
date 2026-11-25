@@ -24,7 +24,7 @@ def enroll(client, user):
     """Проходит настройку защиты. Возвращает (секрет, резервные коды)."""
     client.force_login(user)
     assert client.get("/admin/2fa/setup/").status_code == 200
-    secret = TOTPDevice.objects.get(user=user).secret
+    secret = TOTPDevice.objects.get(user=user).plain_secret
     response = client.post("/admin/2fa/setup/", {"code": totp.totp_now(secret)})
     assert response.status_code == 200
     return secret, BACKUP_RE.findall(response.content.decode())
@@ -51,11 +51,11 @@ def test_enrollment_shows_secret_then_backup_codes_once(client, boss):
     client.force_login(boss)
     page = client.get("/admin/2fa/setup/").content.decode()
     device = TOTPDevice.objects.get(user=boss)
-    assert device.secret in page and device.confirmed_at is None
+    assert device.plain_secret in page and device.confirmed_at is None
     wrong = client.post("/admin/2fa/setup/", {"code": "000000"})
     assert wrong.status_code == 200 and "Код не подошёл" in wrong.content.decode()
     assert TOTPDevice.objects.get(user=boss).confirmed_at is None
-    right = client.post("/admin/2fa/setup/", {"code": totp.totp_now(device.secret)})
+    right = client.post("/admin/2fa/setup/", {"code": totp.totp_now(device.plain_secret)})
     codes = BACKUP_RE.findall(right.content.decode())
     assert len(set(codes)) == 10
     assert TOTPDevice.objects.get(user=boss).confirmed_at is not None
@@ -66,9 +66,9 @@ def test_enrollment_shows_secret_then_backup_codes_once(client, boss):
 def test_setup_page_keeps_the_same_secret_on_reload(client, boss):
     client.force_login(boss)
     client.get("/admin/2fa/setup/")
-    first = TOTPDevice.objects.get(user=boss).secret
+    first = TOTPDevice.objects.get(user=boss).plain_secret
     client.get("/admin/2fa/setup/")
-    assert TOTPDevice.objects.get(user=boss).secret == first
+    assert TOTPDevice.objects.get(user=boss).plain_secret == first
 
 
 def test_new_session_requires_code_and_rejects_replay(client, boss):
@@ -159,3 +159,19 @@ def test_events_are_audited_without_any_codes(client, boss):
     dump = json.dumps(list(AuditLog.objects.values("action", "changes", "note", "object_id")), default=str)
     for secret_value in [secret, "222222", next_code(secret), *codes]:
         assert secret_value not in dump
+
+
+def test_backup_codes_page_shows_count_and_is_linked_from_admin_index(client, boss):
+    enroll(client, boss)
+    page = client.get("/admin/2fa/backup-codes/")
+    assert page.status_code == 200 and "<b>10</b>" in page.content.decode()
+    assert "/admin/2fa/backup-codes/" in client.get("/admin/").content.decode()
+    client.post("/admin/2fa/backup-codes/regenerate/")
+    assert "<b>10</b>" in client.get("/admin/2fa/backup-codes/").content.decode()
+
+
+def test_backup_codes_page_needs_verified_session(client, boss):
+    enroll(client, boss)
+    other = fresh_client(boss)
+    response = other.get("/admin/2fa/backup-codes/")
+    assert response.status_code == 302 and "verify" in response["Location"]

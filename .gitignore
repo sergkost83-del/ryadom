@@ -11,3 +11,5 @@ node_modules/
 *.sqlite3
 .idea/
 .vscode/
+deploy/.env.prod
+deploy/.previous_tag

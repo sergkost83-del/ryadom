@@ -33,7 +33,9 @@ REQUIRED = [
     "backend/apps/communities/models.py", "backend/apps/communities/migrations/0001_initial.py",
     "backend/apps/communities/data/communities_seed.json",
     "docs/ARCHITECTURE.md", "docs/M1_ACCEPTANCE.md", "docs/DECISIONS.md", "docs/LEGACY_MAP.md",
-    "docs/RELEASING.md", "design/tokens.json",
+    "docs/RELEASING.md", "design/tokens.json", "design/assets/manifest.json", "docs/ASSETS.md", "docs/SECURITY.md",
+    "deploy/docker-compose.prod.yml", "deploy/Caddyfile", "deploy/.env.prod.example", "deploy/RUNBOOK.md",
+    "deploy/update.sh", "deploy/rollback.sh", "deploy/backup/backup.sh", "deploy/backup/restore.sh",
 ]
 
 SECRET_PATTERNS = [
@@ -76,6 +78,21 @@ def check_lint():
 
     problems = check_tree(ROOT / "backend")
     return (not problems), problems[:40] or ["необъявленных имён, лишних импортов и слишком длинных строк нет"]
+
+
+def check_assets():
+    sys.path.insert(0, str(ROOT / "tools"))
+    from check_assets import verify
+
+    problems = verify(ROOT / "design" / "assets")
+    return (not problems), problems[:30] or ["изображения приложения совпадают с описью и укладываются в бюджет"]
+
+
+def check_sh_line_endings():
+    bad = [str(p.relative_to(ROOT)) for p in iter_files() if p.suffix == ".sh" and b"\r\n" in p.read_bytes()]
+    return (not bad), [f"{b}: скрипты для Linux должны быть с окончаниями строк LF" for b in bad] or [
+        "скрипты развёртывания в формате Linux (LF)"
+    ]
 
 
 def check_seed():
@@ -176,6 +193,8 @@ def main() -> int:
         ("Версия", check_version),
         ("Секреты в коде", check_secrets),
         ("Файлы .bat", check_bat_line_endings),
+        ("Скрипты .sh", check_sh_line_endings),
+        ("Изображения приложения", check_assets),
         ("Быстрые тесты без базы", run_unittests),
         ("Полные тесты с PostgreSQL", run_full_tests),
     ]

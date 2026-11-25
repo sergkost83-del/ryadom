@@ -5,3 +5,4 @@ psycopg[binary]>=3.2,<4.0
 gunicorn>=22.0,<24
 whitenoise>=6.6,<7.0
 segno>=1.6,<2.0
+cryptography>=42.0,<50
