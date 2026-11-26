@@ -1,7 +1,7 @@
 import type { ImageSourcePropType } from "react-native";
 
 // Файлы копирует команда npm run assets из design/assets. Metro требует статических путей.
-export const AVATARS_256: ImageSourcePropType[] = [1, 2, 3, 4, 5, 6, 7, 8].map((i) => AVATAR_FILES[i - 1]);
+// ВАЖНО: список файлов объявляется раньше, чем список аватаров, который из него строится.
 const AVATAR_FILES: ImageSourcePropType[] = [
   require("../assets/images/avatars/avatar_1_256.webp"),
   require("../assets/images/avatars/avatar_2_256.webp"),
@@ -12,6 +12,8 @@ const AVATAR_FILES: ImageSourcePropType[] = [
   require("../assets/images/avatars/avatar_7_256.webp"),
   require("../assets/images/avatars/avatar_8_256.webp"),
 ];
+
+export const AVATARS_256: ImageSourcePropType[] = AVATAR_FILES;
 
 export const ILLUSTRATIONS = {
   pending: require("../assets/images/illustrations/state_pending.webp") as ImageSourcePropType,
