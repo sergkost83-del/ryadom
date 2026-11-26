@@ -25,6 +25,7 @@ class RegisterSerializer(serializers.Serializer):
     consents = serializers.DictField(child=serializers.CharField(max_length=40))
     building_id = serializers.UUIDField(required=False)
     invite_code = serializers.CharField(max_length=40, required=False, allow_blank=True)
+    avatar_id = serializers.IntegerField(min_value=1, max_value=8, required=False, default=1)
     device_name = serializers.CharField(max_length=60, required=False, allow_blank=True, default="")
 
     def validate_display_name(self, value):

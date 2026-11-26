@@ -2,6 +2,8 @@ import { API_PREFIX } from "../config";
 import { ApiError, buildApiError, networkError } from "./errors";
 import type {
   AddressChangeState,
+  ChatMessage,
+  ChatRoom,
   DirectoryCommunity,
   LegalInfo,
   Notice,
@@ -120,6 +122,16 @@ export function createClient(options: ClientOptions) {
     requestAddressChange: (payload: { building_id?: string; invite_code?: string }) =>
       request<{ request: NonNullable<AddressChangeState["request"]> }>("POST", "/me/address-change/", { body: payload }),
     cancelAddressChange: () => request<null>("POST", "/me/address-change/cancel/"),
+    chatRooms: () => request<{ rooms: ChatRoom[] }>("GET", "/chat/rooms/"),
+    chatMessages: (roomId: string) => request<{ messages: ChatMessage[] }>("GET", `/chat/rooms/${roomId}/messages/`),
+    sendChatMessage: (roomId: string, body: string) =>
+      request<ChatMessage>("POST", `/chat/rooms/${roomId}/messages/`, { body: { body } }),
+    deleteChatMessage: (messageId: string) => request<null>("DELETE", `/chat/messages/${messageId}/`),
+    reportChatMessage: (messageId: string, reason: string) =>
+      request<{ id: string; status: string }>("POST", `/chat/messages/${messageId}/report/`, { body: { reason } }),
+    blockChatAuthor: (messageId: string) =>
+      request<{ blocked_user_id: string }>("POST", `/chat/messages/${messageId}/block-author/`),
+    unblockChatUser: (userId: string) => request<null>("DELETE", `/chat/blocks/${userId}/`),
   };
 }
 

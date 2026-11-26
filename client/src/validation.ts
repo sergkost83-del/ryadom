@@ -31,7 +31,7 @@ export function cleanDisplayName(value: string): string {
 /** Телефон необязателен. Возвращает нормализованный номер, пустую строку или null, если номер некорректен. */
 export function cleanPhone(value: string): string | null {
   const raw = value.replace(/[\s\-()]/g, "");
-  if (raw === "") return "";
+  if (raw === "" || raw === "+7") return "";
   return /^\+?[0-9]{10,15}$/.test(raw) ? raw : null;
 }
 
@@ -49,4 +49,10 @@ export function formatCountdown(seconds: number): string {
   const minutes = Math.floor(safe / 60);
   const rest = safe % 60;
   return `${minutes}:${rest < 10 ? "0" : ""}${rest}`;
+}
+
+/** Поле телефона всегда начинается с «+7»: пользователь вводит только 10 цифр номера. */
+export function phoneDisplay(value: string): string {
+  const digits = (value || "").replace(/\D/g, "").replace(/^[78]/, "").slice(0, 10);
+  return digits === "" ? "+7" : `+7${digits}`;
 }

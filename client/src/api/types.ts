@@ -36,6 +36,7 @@ export interface RegisterPayload {
   registration_token: string;
   display_name: string;
   is_adult: boolean;
+  avatar_id?: number;
   consents: Record<string, string>;
   building_id?: string;
   invite_code?: string;
@@ -98,4 +99,18 @@ export interface ProfilePatch {
   display_name?: string;
   avatar_id?: number;
   phone?: string;
+}
+
+export interface ChatRoom {
+  id: string;
+  kind: "house" | "common";
+  title: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  body: string;
+  created_at: string;
+  mine: boolean;
+  author: { id: string; display_name: string; avatar_id: number } | null;
 }

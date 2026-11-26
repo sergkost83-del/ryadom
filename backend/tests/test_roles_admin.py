@@ -25,6 +25,7 @@ def test_setup_roles_is_idempotent_and_minimal():
         "view_houseinvite", "add_houseinvite", "change_houseinvite",
         "view_notice", "add_notice", "change_notice", "delete_notice",
         "view_building", "view_street", "view_community",
+        "view_room", "view_message", "change_message", "view_report", "change_report",
     }
     forbidden = ("user", "consent", "session", "auditlog", "moderatorassignment", "totp", "backup")
     assert not any(word in c for c in codenames for word in forbidden)

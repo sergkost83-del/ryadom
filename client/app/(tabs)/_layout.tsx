@@ -17,6 +17,7 @@ export default function TabsLayout() {
   return (
     <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.primary, tabBarLabelStyle: { fontSize: 13, fontWeight: "700" } }}>
       <Tabs.Screen name="home" options={{ title: "Главная" }} />
+      <Tabs.Screen name="chats" options={{ title: "Чаты" }} />
       <Tabs.Screen name="profile" options={{ title: "Профиль" }} />
     </Tabs>
   );

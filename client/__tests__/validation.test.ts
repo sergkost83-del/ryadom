@@ -1,6 +1,7 @@
 import {
   cleanDisplayName,
   cleanPhone,
+  phoneDisplay,
   formatCountdown,
   isInviteCodeComplete,
   isValidCode,
@@ -76,5 +77,19 @@ describe("таймер", () => {
     expect(formatCountdown(65)).toBe("1:05");
     expect(formatCountdown(9)).toBe("0:09");
     expect(formatCountdown(-3)).toBe("0:00");
+  });
+});
+
+describe("телефон с префиксом +7", () => {
+  it("всегда показывает +7 и даёт вводить только 10 цифр", () => {
+    expect(phoneDisplay("")).toBe("+7");
+    expect(phoneDisplay("+7")).toBe("+7");
+    expect(phoneDisplay("+79001234567")).toBe("+79001234567");
+    expect(phoneDisplay("89001234567")).toBe("+79001234567");
+    expect(phoneDisplay("900123456789999")).toBe("+79001234567");
+  });
+  it("префикс без цифр считается пустым телефоном", () => {
+    expect(cleanPhone("+7")).toBe("");
+    expect(cleanPhone("+7 ")).toBe("");
   });
 });

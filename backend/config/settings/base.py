@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "apps.identity",
     "apps.communities",
     "apps.audit",
+    "apps.chat",
 ]
 
 MIDDLEWARE = [
@@ -191,3 +192,6 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
 EMAIL_TIMEOUT = 10
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "РЯДОМ <no-reply@localhost>")
+
+# --- Чаты ---
+CHAT_POSTS_PER_10_MIN = 30

@@ -88,7 +88,9 @@ class RegisterView(PublicView):
             with transaction.atomic():
                 if User.objects.filter(email=email).exists():
                     raise services.Conflict()
-                user = User.objects.create_user(email, display_name=v["display_name"], age_confirmed_at=now)
+                user = User.objects.create_user(
+                    email, display_name=v["display_name"], age_confirmed_at=now, avatar_id=v.get("avatar_id", 1)
+                )
                 Consent.objects.bulk_create(
                     [
                         Consent(user=user, consent_type=kind, version=version, accepted_at=now)

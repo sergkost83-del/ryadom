@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { ApiError, errorMessage } from "../../src/api/errors";
 import { api, DEVICE_NAME } from "../../src/api/instance";
@@ -9,6 +9,8 @@ import { useAuth } from "../../src/auth/AuthContext";
 import { flow } from "../../src/flow";
 import { colors, spacing } from "../../src/theme";
 import { cleanDisplayName, isInviteCodeComplete, nameError, normalizeInviteCode } from "../../src/validation";
+import { AVATARS_256 } from "../../src/assets";
+import { Avatar } from "../../src/ui/Avatar";
 import { Banner } from "../../src/ui/Banner";
 import { Button } from "../../src/ui/Button";
 import { Checkbox } from "../../src/ui/Checkbox";
@@ -26,6 +28,7 @@ export default function RegisterScreen() {
   const [mode, setMode] = useState<"house" | "invite">("house");
   const [buildingId, setBuildingId] = useState<string | null>(null);
   const [invite, setInvite] = useState("");
+  const [avatar, setAvatar] = useState(1);
   const [adult, setAdult] = useState(false);
   const [acceptPolicy, setAcceptPolicy] = useState(false);
   const [acceptData, setAcceptData] = useState(false);
@@ -67,6 +70,7 @@ export default function RegisterScreen() {
         registration_token: flow.registrationToken,
         display_name: cleanDisplayName(name),
         is_adult: true,
+        avatar_id: avatar,
         consents: legal.documents,
         ...(mode === "house" ? { building_id: buildingId ?? undefined } : { invite_code: invite }),
         device_name: DEVICE_NAME,
@@ -95,6 +99,15 @@ export default function RegisterScreen() {
     <Screen>
       <Text style={styles.title}>Знакомство</Text>
       <TextField label="Как вас зовут" value={name} onChangeText={setName} autoCapitalize="words" placeholder="Анна Иванова" error={nameProblem ?? fieldErrors.display_name} testID="name-input" />
+
+      <Text style={styles.section}>Аватар</Text>
+      <View style={styles.avatars}>
+        {AVATARS_256.map((_, index) => (
+          <Pressable key={index} testID={`reg-avatar-${index + 1}`} accessibilityRole="button" accessibilityState={{ selected: avatar === index + 1 }} onPress={() => setAvatar(index + 1)} style={[styles.avatarBox, avatar === index + 1 && styles.avatarBoxSelected]}>
+            <Avatar id={index + 1} size={56} />
+          </Pressable>
+        ))}
+      </View>
 
       <Text style={styles.section}>Ваш дом</Text>
       <View style={styles.tabs}>
@@ -135,4 +148,7 @@ const styles = StyleSheet.create({
   tabs: { flexDirection: "row", gap: spacing.s },
   muted: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
   error: { color: colors.danger, fontSize: 13 },
+  avatars: { flexDirection: "row", flexWrap: "wrap", gap: spacing.s },
+  avatarBox: { borderRadius: 34, padding: 2, borderWidth: 3, borderColor: "transparent" },
+  avatarBoxSelected: { borderColor: colors.primary },
 });

@@ -7,7 +7,7 @@ import { api } from "../../src/api/instance";
 import { AVATARS_256 } from "../../src/assets";
 import { useAuth } from "../../src/auth/AuthContext";
 import { colors, spacing } from "../../src/theme";
-import { cleanDisplayName, cleanPhone, nameError } from "../../src/validation";
+import { cleanDisplayName, cleanPhone, nameError, phoneDisplay } from "../../src/validation";
 import { Avatar } from "../../src/ui/Avatar";
 import { Banner } from "../../src/ui/Banner";
 import { Button } from "../../src/ui/Button";
@@ -18,7 +18,7 @@ export default function EditProfileScreen() {
   const { state, setUser } = useAuth();
   const user = state.status === "signedIn" ? state.user : null;
   const [name, setName] = useState(user?.display_name ?? "");
-  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [phone, setPhone] = useState(phoneDisplay(user?.phone ?? ""));
   const [avatar, setAvatar] = useState(user?.avatar_id ?? 1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export default function EditProfileScreen() {
         ))}
       </View>
       <TextField label="Имя" value={name} onChangeText={setName} autoCapitalize="words" error={nameProblem ?? fieldErrors.display_name} testID="edit-name" />
-      <TextField label="Телефон (необязательно)" value={phone} onChangeText={setPhone} keyboardType="phone-pad" placeholder="+7 900 000-00-00" error={phoneProblem ?? fieldErrors.phone} testID="edit-phone" />
+      <TextField label="Телефон (необязательно)" value={phone} onChangeText={(text) => setPhone(phoneDisplay(text))} keyboardType="phone-pad" placeholder="+7 900 000-00-00" error={phoneProblem ?? fieldErrors.phone} testID="edit-phone" />
       {error ? <Banner message={error} testID="edit-error" /> : null}
       <Button title="Сохранить" onPress={save} disabled={!!nameProblem || cleanedPhone === null} loading={busy} testID="edit-save" />
     </Screen>
