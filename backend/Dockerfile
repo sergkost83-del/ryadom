@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 COPY . .
 RUN useradd --create-home --uid 10001 app \
-    && DJANGO_SETTINGS_MODULE=config.settings.dev python manage.py collectstatic --noinput \
+    && DJANGO_SETTINGS_MODULE=config.settings.test python manage.py collectstatic --noinput \
     && chown -R app:app /app
 USER app
 
