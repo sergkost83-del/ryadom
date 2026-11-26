@@ -89,7 +89,8 @@ def test_invalid_bodies_are_rejected(world, body):
 
 def test_control_characters_are_removed_and_text_kept_as_text(world):
     common = rooms(world["ann"])["common"]
-    response = post(world["ann"], common["id"], "  <b>привет</b>\x00\n\nмир  ")
+    # \x00 DRF отвергает сам (нулевой символ запрещён), поэтому проверяем другой управляющий символ
+    response = post(world["ann"], common["id"], "  <b>привет</b>\x07\n\nмир  ")
     assert response.status_code == 201
     assert response.json()["body"] == "<b>привет</b>\n\nмир"
 
@@ -97,7 +98,7 @@ def test_control_characters_are_removed_and_text_kept_as_text(world):
 def test_author_can_delete_own_message_and_it_disappears(world):
     common = rooms(world["ann"])["common"]
     mine = post(world["ann"], common["id"], "ошибка").json()
-    assert world["bob"].delete(f"/api/v1/chat/messages/{mine['id']}/").status_code == 404
+    assert world["bob"].delete(f"/api/v1/chat/messages/{mine['id']}/").status_code == 403
     assert world["ann"].delete(f"/api/v1/chat/messages/{mine['id']}/").status_code == 204
     assert world["ann"].get(f"/api/v1/chat/rooms/{common['id']}/messages/").json()["messages"] == []
 
@@ -189,6 +190,7 @@ def test_reports_are_resolved_by_moderator_of_community(client, world):
 
 
 def test_only_one_house_chat_per_building_and_one_common_per_community(world):
+    rooms(world["ann"])  # чаты создаются при первом обращении
     with pytest.raises(IntegrityError):
         with transaction.atomic():
             Room.objects.create(

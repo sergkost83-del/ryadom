@@ -79,7 +79,7 @@ class MessageReportView(ChatBase):
 
 
 class MessageBlockView(ChatBase):
-    @extend_schema(operation_id="chat_message_block_author", responses={201: OpenApiTypes.OBJECT})
+    @extend_schema(operation_id="chat_message_block_author", request=None, responses={201: OpenApiTypes.OBJECT})
     def post(self, request, pk):
         message = _message_for(request, pk)
         block = services.block_author(request.user, message)
