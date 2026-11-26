@@ -13,3 +13,4 @@ node_modules/
 .vscode/
 deploy/.env.prod
 deploy/.previous_tag
+client/e2e/node_modules/

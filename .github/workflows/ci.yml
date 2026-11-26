@@ -189,3 +189,84 @@ jobs:
             reports/
             client/package-lock.json
           if-no-files-found: warn
+
+  e2e:
+    name: Сквозной сценарий (браузер)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ryadom
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      POSTGRES_HOST: localhost
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ryadom
+      EMAIL_BACKEND: django.core.mail.backends.filebased.EmailBackend
+      EMAIL_FILE_PATH: /tmp/ryadom-mail
+      EXPO_NO_TELEMETRY: "1"
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Зависимости сервера
+        run: pip install -r backend/requirements.txt
+      - name: 'База: миграции, справочник, роли, демо-приглашения'
+        working-directory: backend
+        run: |
+          mkdir -p ../reports
+          python manage.py migrate --noinput
+          python manage.py load_communities
+          python manage.py setup_roles
+          python manage.py seed_demo --out /tmp/ryadom-invites.json
+      - name: Запуск сервера
+        working-directory: backend
+        run: |
+          nohup python manage.py runserver 127.0.0.1:8000 --noreload > ../reports/backend.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:8000/api/v1/health/ && break; sleep 2; done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Сборка веба
+        working-directory: client
+        env:
+          EXPO_PUBLIC_API_URL: http://127.0.0.1:8000
+        run: |
+          npm ci
+          npx expo export --platform web
+      - name: Запуск веба
+        run: |
+          nohup npx --yes serve@14 -s client/dist -l 8081 > reports/web.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:8081/welcome > /dev/null && break; sleep 2; done
+      - name: Сценарии браузера
+        working-directory: client/e2e
+        env:
+          E2E_INVITES_FILE: /tmp/ryadom-invites.json
+          E2E_BASE_URL: http://localhost:8081
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npx playwright test
+      - name: Отчёты (браузер, журнал сервера)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reports
+          path: |
+            reports/
+          if-no-files-found: warn
