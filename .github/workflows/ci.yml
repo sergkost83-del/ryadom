@@ -242,6 +242,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Копирование изображений
+        run: node client/scripts/sync-assets.mjs
       - name: Сборка веба
         working-directory: client
         env:
