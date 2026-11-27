@@ -27,7 +27,7 @@ class Command(BaseCommand):
         if len(buildings) < 2:
             raise CommandError("Нужны минимум два дома в ЖК.")
         codes = {}
-        for key, building in zip(("a1", "a2"), buildings):
+        for key, building in zip(("a1", "a2"), buildings, strict=True):
             _, code = create_invite(created_by=None, building=building, expires_in_days=1, note="демо")
             codes[key] = code
         payload = json.dumps(codes, ensure_ascii=False, indent=2)

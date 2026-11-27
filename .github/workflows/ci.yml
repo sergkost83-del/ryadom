@@ -225,7 +225,7 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements.txt
       - name: Зависимости сервера
-        run: pip install -r backend/requirements.txt
+        run: pip install -r backend/requirements-dev.txt
       - name: 'База: миграции, справочник, роли, демо-приглашения'
         working-directory: backend
         run: |
