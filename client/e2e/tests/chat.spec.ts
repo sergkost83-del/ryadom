@@ -55,8 +55,9 @@ async function send(page: Page, text: string) {
   await expect(page.getByText(text, { exact: true })).toBeVisible();
 }
 
-async function twoNeighbours(browser: Browser) {
-  const invites = JSON.parse(readFileSync(INVITES_FILE, "utf8")) as { a1: string; a2: string };
+async function twoNeighbours(browser: Browser, pair: "a" | "b") {
+  const all = JSON.parse(readFileSync(INVITES_FILE, "utf8")) as Record<string, string>;
+  const invites = { a1: all[`${pair}1`], a2: all[`${pair}2`] };
   const stamp = Date.now();
   const anna = await browser.newContext();
   const boris = await browser.newContext();
@@ -73,7 +74,7 @@ async function twoNeighbours(browser: Browser) {
 }
 
 test("два соседа из разных домов переписываются в общем чате", async ({ browser }) => {
-  const { stamp, invites, annaPage, borisPage, closeAll } = await twoNeighbours(browser);
+  const { stamp, invites, annaPage, borisPage, closeAll } = await twoNeighbours(browser, "a");
   try {
     await registerByInvite(annaPage, `anna${stamp}@example.com`, invites.a1, "Анна Иванова");
     await registerByInvite(borisPage, `boris${stamp}@example.com`, invites.a2, "Борис Петров");
@@ -98,7 +99,7 @@ test("два соседа из разных домов переписывают�
 });
 
 test("сообщение можно удалить и оно исчезает у соседа", async ({ browser }) => {
-  const { stamp, invites, annaPage, borisPage, closeAll } = await twoNeighbours(browser);
+  const { stamp, invites, annaPage, borisPage, closeAll } = await twoNeighbours(browser, "b");
   try {
     await registerByInvite(annaPage, `anna2${stamp}@example.com`, invites.a1, "Анна Иванова");
     await registerByInvite(borisPage, `boris2${stamp}@example.com`, invites.a2, "Борис Петров");

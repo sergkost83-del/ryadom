@@ -11,7 +11,7 @@ from apps.communities.services import create_invite
 
 
 class Command(BaseCommand):
-    help = "Создаёт два одноразовых кода приглашения в разные дома одного ЖК (только для разработки и проверок)."
+    help = "Создаёт одноразовые коды приглашения в четыре дома одного ЖК (только для разработки и проверок)."
 
     def add_arguments(self, parser):
         parser.add_argument("--out", default=None, help="Файл для записи кодов (JSON). Без него — в консоль.")
@@ -23,11 +23,12 @@ class Command(BaseCommand):
         community = Community.objects.filter(slug=options["community"]).first()
         if community is None:
             raise CommandError("ЖК не найден. Сначала выполните load_communities.")
-        buildings = list(Building.objects.filter(street__community=community).order_by("label")[:2])
-        if len(buildings) < 2:
-            raise CommandError("Нужны минимум два дома в ЖК.")
+        buildings = list(Building.objects.filter(street__community=community).order_by("label")[:4])
+        if len(buildings) < 4:
+            raise CommandError("Нужны минимум четыре дома в ЖК.")
         codes = {}
-        for key, building in zip(("a1", "a2"), buildings, strict=True):
+        # a1/a2 и b1/b2 — два набора по два дома: каждый сценарий использует свой набор (коды одноразовые)
+        for key, building in zip(("a1", "a2", "b1", "b2"), buildings, strict=True):
             _, code = create_invite(created_by=None, building=building, expires_in_days=1, note="демо")
             codes[key] = code
         payload = json.dumps(codes, ensure_ascii=False, indent=2)

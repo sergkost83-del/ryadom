@@ -16,12 +16,12 @@ def test_demo_seed_refuses_outside_development(settings, seeded):
         call_command("seed_demo")
 
 
-def test_demo_seed_creates_two_invites_in_different_houses(settings, seeded, tmp_path):
+def test_demo_seed_creates_invites_in_four_different_houses(settings, seeded, tmp_path):
     settings.DEBUG = True
     out = tmp_path / "codes.json"
     call_command("seed_demo", out=str(out))
     codes = json.loads(out.read_text(encoding="utf-8"))
-    assert set(codes) == {"a1", "a2"} and codes["a1"] != codes["a2"]
+    assert set(codes) == {"a1", "a2", "b1", "b2"} and len(set(codes.values())) == 4
     community = Community.objects.get(slug="novye-gorizonty")
-    assert Building.objects.filter(street__community=community).count() >= 2
+    assert Building.objects.filter(street__community=community).count() >= 4
     assert not User.objects.filter(is_staff=True).exists()
