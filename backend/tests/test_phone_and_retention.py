@@ -55,7 +55,7 @@ def test_phone_consent_does_not_block_app_access(api, house):
 
 
 def test_purge_clears_phones_without_consent_and_keeps_those_with_it(api, house):
-    without = resident(api, "p-without@example.com", house)
+    resident(api, "p-without@example.com", house)
     with_consent = resident(api, "p-with@example.com", house)
     User.objects.filter(email="p-without@example.com").update(phone="+79001111111")
     with_consent.patch("/api/v1/me/", {"phone": "+79002222222", "phone_consent": True}, format="json")
