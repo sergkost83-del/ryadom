@@ -14,7 +14,12 @@ def test_profile_update_name_avatar_phone(api, building):
     client = _client(api, building)
     response = client.patch(
         "/api/v1/me/",
-        {"display_name": "  Пётр   Сидоров ", "avatar_id": 5, "phone": "+7 (900) 123-45-67"},
+        {
+            "display_name": "  Пётр   Сидоров ",
+            "avatar_id": 5,
+            "phone": "+7 (900) 123-45-67",
+            "phone_consent": True,
+        },
         format="json",
     )
     assert response.status_code == 200
@@ -25,7 +30,7 @@ def test_profile_update_name_avatar_phone(api, building):
 
 def test_phone_is_optional_and_can_be_cleared(api, building):
     client = _client(api, building)
-    client.patch("/api/v1/me/", {"phone": "89001234567"}, format="json")
+    client.patch("/api/v1/me/", {"phone": "89001234567", "phone_consent": True}, format="json")
     assert client.patch("/api/v1/me/", {"phone": ""}, format="json").json()["phone"] == ""
 
 
