@@ -25,6 +25,7 @@ export interface User {
   phone: string;
   account_type: string;
   consents_up_to_date: boolean;
+  phone_consent: boolean;
   membership: MembershipInfo | null;
 }
 
@@ -99,6 +100,7 @@ export interface ProfilePatch {
   display_name?: string;
   avatar_id?: number;
   phone?: string;
+  phone_consent?: boolean;
 }
 
 export interface ChatRoom {

@@ -1,6 +1,8 @@
 import {
   cleanDisplayName,
   cleanPhone,
+  canSavePhone,
+  phoneConsentRequired,
   phoneDisplay,
   formatCountdown,
   isInviteCodeComplete,
@@ -91,5 +93,21 @@ describe("телефон с префиксом +7", () => {
   it("префикс без цифр считается пустым телефоном", () => {
     expect(cleanPhone("+7")).toBe("");
     expect(cleanPhone("+7 ")).toBe("");
+  });
+});
+
+describe("согласие на телефон", () => {
+  it("без номера согласие не нужно", () => {
+    expect(phoneConsentRequired("", false)).toBe(false);
+    expect(canSavePhone("", false, false)).toBe(true);
+  });
+  it("с номером без согласия сохранить нельзя, пока не отмечено", () => {
+    expect(phoneConsentRequired("+79001234567", false)).toBe(true);
+    expect(canSavePhone("+79001234567", false, false)).toBe(false);
+    expect(canSavePhone("+79001234567", false, true)).toBe(true);
+  });
+  it("если согласие уже дано, номер сохраняется без отметки", () => {
+    expect(phoneConsentRequired("+79001234567", true)).toBe(false);
+    expect(canSavePhone("+79001234567", true, false)).toBe(true);
   });
 });

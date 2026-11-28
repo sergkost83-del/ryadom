@@ -61,5 +61,6 @@ export const sampleUser = {
   phone: "",
   account_type: "adult",
   consents_up_to_date: true,
+  phone_consent: false,
   membership: null,
 };

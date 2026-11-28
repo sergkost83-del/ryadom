@@ -181,9 +181,21 @@ class MeView(APIView):
         data = ProfileUpdateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         user = request.user
-        for field, value in data.validated_data.items():
+        changes = dict(data.validated_data)
+        consent_given = changes.pop("phone_consent", False)
+        if "phone" in changes:
+            if changes["phone"]:
+                if consent_given:
+                    services.accept_phone_consent(user)
+                elif not services.phone_consent_active(user):
+                    raise ValidationError(
+                        {"phone": "Чтобы сохранить номер, подтвердите согласие на обработку номера телефона."}
+                    )
+            else:
+                services.withdraw_phone_consent(user)  # номер удалён — согласие отозвано
+        for field, value in changes.items():
             setattr(user, field, value)
-        user.save(update_fields=list(data.validated_data) or None)
+        user.save(update_fields=list(changes) or None)
         return Response(user_payload(user))
 
 

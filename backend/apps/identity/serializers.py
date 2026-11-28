@@ -79,6 +79,7 @@ class ProfileUpdateSerializer(serializers.Serializer):
     display_name = serializers.CharField(max_length=100, required=False)
     avatar_id = serializers.IntegerField(min_value=1, max_value=8, required=False)
     phone = serializers.CharField(max_length=30, required=False, allow_blank=True)
+    phone_consent = serializers.BooleanField(required=False, default=False)
 
     def validate(self, attrs):
         unknown = set(self.initial_data) - set(self.fields)
@@ -153,5 +154,6 @@ def user_payload(user):
         "phone": user.phone,
         "account_type": user.account_type,
         "consents_up_to_date": services.consents_up_to_date(user),
+        "phone_consent": services.phone_consent_active(user),
         "membership": membership_payload(user),
     }

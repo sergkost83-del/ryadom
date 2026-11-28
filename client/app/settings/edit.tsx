@@ -7,10 +7,11 @@ import { api } from "../../src/api/instance";
 import { AVATARS_256 } from "../../src/assets";
 import { useAuth } from "../../src/auth/AuthContext";
 import { colors, spacing } from "../../src/theme";
-import { cleanDisplayName, cleanPhone, nameError, phoneDisplay } from "../../src/validation";
+import { canSavePhone, cleanDisplayName, cleanPhone, nameError, phoneConsentRequired, phoneDisplay } from "../../src/validation";
 import { Avatar } from "../../src/ui/Avatar";
 import { Banner } from "../../src/ui/Banner";
 import { Button } from "../../src/ui/Button";
+import { Checkbox } from "../../src/ui/Checkbox";
 import { Screen } from "../../src/ui/Screen";
 import { TextField } from "../../src/ui/TextField";
 
@@ -20,6 +21,7 @@ export default function EditProfileScreen() {
   const [name, setName] = useState(user?.display_name ?? "");
   const [phone, setPhone] = useState(phoneDisplay(user?.phone ?? ""));
   const [avatar, setAvatar] = useState(user?.avatar_id ?? 1);
+  const [phoneChecked, setPhoneChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -28,14 +30,22 @@ export default function EditProfileScreen() {
   const nameProblem = nameError(name);
   const cleanedPhone = cleanPhone(phone);
   const phoneProblem = cleanedPhone === null ? "Телефон: от 10 до 15 цифр, можно с плюсом." : null;
+  const alreadyConsented = user.phone_consent;
+  const needsConsent = cleanedPhone !== null && phoneConsentRequired(cleanedPhone, alreadyConsented);
+  const phoneOk = cleanedPhone !== null && canSavePhone(cleanedPhone, alreadyConsented, phoneChecked);
 
   async function save() {
-    if (nameProblem || cleanedPhone === null || busy) return;
+    if (nameProblem || !phoneOk || cleanedPhone === null || busy) return;
     setBusy(true);
     setError(null);
     setFieldErrors({});
     try {
-      const updated = await api.updateMe({ display_name: cleanDisplayName(name), avatar_id: avatar, phone: cleanedPhone });
+      const updated = await api.updateMe({
+        display_name: cleanDisplayName(name),
+        avatar_id: avatar,
+        phone: cleanedPhone,
+        phone_consent: phoneChecked,
+      });
       setUser(updated);
       router.back();
     } catch (e) {
@@ -58,8 +68,18 @@ export default function EditProfileScreen() {
       </View>
       <TextField label="Имя" value={name} onChangeText={setName} autoCapitalize="words" error={nameProblem ?? fieldErrors.display_name} testID="edit-name" />
       <TextField label="Телефон (необязательно)" value={phone} onChangeText={(text) => setPhone(phoneDisplay(text))} keyboardType="phone-pad" placeholder="+7 900 000-00-00" error={phoneProblem ?? fieldErrors.phone} testID="edit-phone" />
+      {needsConsent ? (
+        <Checkbox
+          checked={phoneChecked}
+          onChange={setPhoneChecked}
+          label="Согласен(на) на обработку номера телефона для связи по моим обращениям и заявке на подтверждение дома."
+          linkText="Подробнее."
+          onLinkPress={() => router.push("/legal/phone_consent")}
+          testID="phone-consent-check"
+        />
+      ) : null}
       {error ? <Banner message={error} testID="edit-error" /> : null}
-      <Button title="Сохранить" onPress={save} disabled={!!nameProblem || cleanedPhone === null} loading={busy} testID="edit-save" />
+      <Button title="Сохранить" onPress={save} disabled={!!nameProblem || !phoneOk} loading={busy} testID="edit-save" />
     </Screen>
   );
 }

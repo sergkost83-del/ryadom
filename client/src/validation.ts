@@ -56,3 +56,13 @@ export function phoneDisplay(value: string): string {
   const digits = (value || "").replace(/\D/g, "").replace(/^[78]/, "").slice(0, 10);
   return digits === "" ? "+7" : `+7${digits}`;
 }
+
+/** Нужна ли отметка согласия на телефон: номер введён, а согласие ещё не дано. */
+export function phoneConsentRequired(cleanedPhone: string, alreadyConsented: boolean): boolean {
+  return cleanedPhone !== "" && !alreadyConsented;
+}
+
+/** Можно ли сохранить профиль: без номера или с номером при согласии (уже дано или отмечено сейчас). */
+export function canSavePhone(cleanedPhone: string, alreadyConsented: boolean, checked: boolean): boolean {
+  return !phoneConsentRequired(cleanedPhone, alreadyConsented) || checked;
+}

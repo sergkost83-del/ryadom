@@ -240,3 +240,38 @@ def restore_if_within_grace(user):
     user.deletion_requested_at = None
     user.save(update_fields=["is_active", "deletion_requested_at"])
     return True
+
+
+PHONE_CONSENT_TYPE = "phone"
+
+
+def phone_consent_active(user):
+    from .models import Consent
+
+    return Consent.objects.filter(user=user, consent_type=PHONE_CONSENT_TYPE, withdrawn_at__isnull=True).exists()
+
+
+def accept_phone_consent(user):
+    """Фиксирует согласие на номер телефона (отдельное от обязательных документов)."""
+    from .models import Consent
+
+    now = timezone.now()
+    consent, created = Consent.objects.get_or_create(
+        user=user,
+        consent_type=PHONE_CONSENT_TYPE,
+        version=settings.PHONE_CONSENT_VERSION,
+        defaults={"accepted_at": now},
+    )
+    if not created and consent.withdrawn_at is not None:
+        consent.withdrawn_at = None
+        consent.accepted_at = now
+        consent.save(update_fields=["withdrawn_at", "accepted_at"])
+    return consent
+
+
+def withdraw_phone_consent(user):
+    from .models import Consent
+
+    Consent.objects.filter(user=user, consent_type=PHONE_CONSENT_TYPE, withdrawn_at__isnull=True).update(
+        withdrawn_at=timezone.now()
+    )
